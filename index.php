@@ -74,10 +74,21 @@ class Webscraper {
 
     }
 
+    function toolfetch(){
+        $ch = curl_init();  // Initialising cURL
+        curl_setopt($ch, CURLOPT_URL, "http://www.toolfetch.com/by-brand/vestil/l/brand:vestil.html?limit=48&p=1");    // Setting cURL's URL option with the $url variable passed into the function
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE); // Setting cURL's option to return the webpage data
+        $data = curl_exec($ch); // Executing the cURL request and assigning the returned data to the $data variable
+        curl_close($ch);    // Closing cURL
+        echo $data;
+
+        // 171 pages 48 resutls
+    }
+
 }
 
 $hofequipmentScraper = new Webscraper;
 
-$hofequipmentScraper->industrialsafety();
+$hofequipmentScraper->toolfetch();
 
  ?>
