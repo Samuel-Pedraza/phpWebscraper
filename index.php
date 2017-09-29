@@ -50,11 +50,26 @@ class Webscraper {
 
     function industrialsafety(){
 
-        $html = new simple_html_dom();
-
         for($pages = 1; $pages <= 13; $pages++){
-            echo "https://industrialsafety.com/catalogsearch/result/index/?p=" . $pages . "&product_list_limit=80&product_list_order=name&q=vestil";
-            echo "<br />";
+            $html = new simple_html_dom();
+
+            $html->load_file("https://industrialsafety.com/catalogsearch/result/index/?p=" . $pages . "&product_list_limit=80&product_list_order=name&q=vestil");
+
+            $query = $html->find("div.products-grid .grid-product-type li");
+
+            foreach ($query as $product) {
+
+                foreach ($product->find(".product-item-link") as $sku) {
+                    $mySku = trim($sku->plaintext);
+                    $skuArray = explode(" ", $mySku);
+                    echo $skuArray[1];
+                    echo "<br />";
+                }
+
+                foreach($product->find(".price-wrapper .price") as $price){
+                    echo $price;
+                }
+            }
         }
 
     }
