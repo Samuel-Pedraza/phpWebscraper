@@ -5,6 +5,7 @@
     include("simple_html_dom.php");
 
 
+
 class Webscraper {
 
     function hofequipment() {
@@ -75,20 +76,84 @@ class Webscraper {
     }
 
     function toolfetch(){
-        $ch = curl_init();  // Initialising cURL
-        curl_setopt($ch, CURLOPT_URL, "http://www.toolfetch.com/by-brand/vestil/l/brand:vestil.html?limit=48&p=1");    // Setting cURL's URL option with the $url variable passed into the function
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE); // Setting cURL's option to return the webpage data
-        $data = curl_exec($ch); // Executing the cURL request and assigning the returned data to the $data variable
-        curl_close($ch);    // Closing cURL
-        echo $data;
 
-        // 171 pages 48 resutls
+            //step1
+            $cSession = curl_init();
+            //step2
+            curl_setopt($cSession,CURLOPT_URL,"http://www.toolfetch.com/by-brand/vestil/l/brand:vestil.html?limit=48&p=1");
+            curl_setopt($cSession,CURLOPT_RETURNTRANSFER,true);
+            curl_setopt($cSession,CURLOPT_HEADER, false);
+            //step3
+            $result=curl_exec($cSession);
+            //step4
+            curl_close($cSession);
+            //step5
+            $html = new simple_html_dom();
+            $mywebsite = $html->load($result);
+
+            $array = $mywebsite->find("ul.products-grid li a.product-image");
+
+            foreach ($array as $key) {
+
+                $mysession = curl_init();
+                //step2
+                curl_setopt($mysession, CURLOPT_URL, $key->href);
+                curl_setopt($mysession, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($mysession, CURLOPT_HEADER, false);
+                //step3
+                $myresult=curl_exec($mysession);
+                //step4
+                curl_close($mysession);
+
+                $myhtml = new simple_html_dom();
+                $thiswebsite = $html->load($myresult);
+
+                $informationforgivenpage = $thiswebsite->find(".add-to-box span.price");
+                $productid = $thiswebsite->find("p.product-ids");
+
+                foreach ($productid as $productinformation) {
+                    echo $productinformation;
+                }
+
+                foreach ($informationforgivenpage as $price) {
+                    echo $price;
+                }
+
+            }
+        // 172 pages 48 results
+    }
+
+    function opentip(){
+        $html = new simple_html_dom();
+        $html->load_file("https://www.opentip.com/search.php?keywords=vestil&limit=100");
+
+        $card = $html->find(".item-detail");
+
+        foreach ($card as $key) {
+
+            $sku = $key->find(".products_sku span");
+
+            $price = $key->find(".products_price");
+
+            foreach ($price as $num) {
+                echo $num;
+            }
+
+            foreach ($sku as $model) {
+                echo $model;
+                echo "<br />";
+            }
+
+        }
     }
 
 }
 
-$hofequipmentScraper = new Webscraper;
+$myWebscraper = new Webscraper;
 
-$hofequipmentScraper->toolfetch();
+$myWebscraper->hofequipment();
+$myWebscraper->industrialsafety();
+$myWebscraper->toolfetch();
+$myWebscraper->opentip();
 
  ?>
