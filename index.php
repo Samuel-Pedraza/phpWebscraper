@@ -6,7 +6,7 @@
 
 
 
-class Webscraper {
+class Vestilwebscraper {
 
     function hofequipment() {
 
@@ -120,7 +120,6 @@ class Webscraper {
                 }
 
             }
-        // 172 pages 48 results
     }
 
     function opentip(){
@@ -149,7 +148,7 @@ class Webscraper {
 
 }
 
-$myWebscraper = new Webscraper;
+$myWebscraper = new Vestilwebscraper;
 
 $myWebscraper->hofequipment();
 $myWebscraper->industrialsafety();
