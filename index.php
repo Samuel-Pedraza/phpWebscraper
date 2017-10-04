@@ -1,14 +1,34 @@
 <?php
+use \Psr\Http\Message\ServerRequestInterface as Request;
+use \Psr\Http\Message\ResponseInterface as Response;
+use Slim\Views\PhpRenderer;
 
-    set_time_limit(0);
+require 'vendor/autoload.php';
 
-    include("simple_html_dom.php");
+include("simple_html_dom.php");
 
+$app = new \Slim\App();
+$container = $app->getContainer();
+$container['renderer'] = new PhpRenderer("./templates");
 
+$app->get('/', function ($request, $response, $args) {
+    return $this->renderer->render($response, "/home.php", $args);
+});
+
+$app->post('/getVestil', function($request, $response, $args){
+
+    $myWebscraper = new Vestilwebscraper;
+
+    $myWebscraper->toolfetch();
+});
+
+$app->run();
 
 class Vestilwebscraper {
 
     function hofequipment() {
+
+        set_time_limit(0);
 
         $html = new simple_html_dom();
 
@@ -21,6 +41,7 @@ class Vestilwebscraper {
                 $grabProducts = new simple_html_dom();
 
                 $grabProducts->load_file($key->href);
+                sleep(3);
 
                 if($grabProducts->find("table.responsive_tables tbody tr") == True){
                     foreach ($grabProducts->find("table.responsive_tables tbody tr") as $tr) {
@@ -30,9 +51,10 @@ class Vestilwebscraper {
                         }
 
                         foreach ($tr->find("td[data-title=Price]") as $price) {
-                                $mprice = preg_replace("/[(),$]/", "", $price);
-                                echo $mprice . "<br />";
+                            $mprice = preg_replace("/[(),$]/", "", $price);
+                            echo $mprice . "<br />";
                         }
+
                     }
                 } else {
                     foreach ($tr->find("span.field-value") as $sku) {
@@ -40,13 +62,12 @@ class Vestilwebscraper {
                     }
 
                     foreach ($tr->find("#price") as $price) {
-                            $mprice = preg_replace("/[(),$]/", "", $price);
-                            echo $mprice . "<br />";
+                        $mprice = preg_replace("/[(),$]/", "", $price);
+                        echo $mprice . "<br />";
                     }
                 }
             }
         }
-
     }
 
     function industrialsafety(){
@@ -55,7 +76,7 @@ class Vestilwebscraper {
             $html = new simple_html_dom();
 
             $html->load_file("https://industrialsafety.com/catalogsearch/result/index/?p=" . $pages . "&product_list_limit=80&product_list_order=name&q=vestil");
-
+            sleep(3);
             $query = $html->find("div.products-grid .grid-product-type li");
 
             foreach ($query as $product) {
@@ -127,7 +148,7 @@ class Vestilwebscraper {
         $html->load_file("https://www.opentip.com/search.php?keywords=vestil&limit=100");
 
         $card = $html->find(".item-detail");
-
+        sleep(3);
         foreach ($card as $key) {
 
             $sku = $key->find(".products_sku span");
@@ -147,12 +168,3 @@ class Vestilwebscraper {
     }
 
 }
-
-$myWebscraper = new Vestilwebscraper;
-
-$myWebscraper->hofequipment();
-$myWebscraper->industrialsafety();
-$myWebscraper->toolfetch();
-$myWebscraper->opentip();
-
- ?>
