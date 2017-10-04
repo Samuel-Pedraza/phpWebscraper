@@ -1,28 +1,26 @@
 <?php
-use \Psr\Http\Message\ServerRequestInterface as Request;
-use \Psr\Http\Message\ResponseInterface as Response;
-use Slim\Views\PhpRenderer;
-
-require 'vendor/autoload.php';
+// use \Psr\Http\Message\ServerRequestInterface as Request;
+// use \Psr\Http\Message\ResponseInterface as Response;
+// use Slim\Views\PhpRenderer;
+//
+// require 'vendor/autoload.php';
 
 include("simple_html_dom.php");
+//
+// $app = new \Slim\App();
+// $container = $app->getContainer();
+// $container['renderer'] = new PhpRenderer("./templates");
+//
+// $app->get('/', function ($request, $response, $args) {
+//     return $this->renderer->render($response, "/home.php", $args);
+// });
+//
+// $app->post('/getVestil', function($request, $response, $args){
 
-$app = new \Slim\App();
-$container = $app->getContainer();
-$container['renderer'] = new PhpRenderer("./templates");
 
-$app->get('/', function ($request, $response, $args) {
-    return $this->renderer->render($response, "/home.php", $args);
-});
+// });
 
-$app->post('/getVestil', function($request, $response, $args){
-
-    $myWebscraper = new Vestilwebscraper;
-
-    $myWebscraper->toolfetch();
-});
-
-$app->run();
+// $app->run();
 
 class Vestilwebscraper {
 
@@ -71,7 +69,7 @@ class Vestilwebscraper {
     }
 
     function industrialsafety(){
-
+        set_time_limit(0);
         for($pages = 1; $pages <= 13; $pages++){
             $html = new simple_html_dom();
 
@@ -97,11 +95,12 @@ class Vestilwebscraper {
     }
 
     function toolfetch(){
-
+        for($j = 1; $j <= 142; $j++){
             //step1
+            set_time_limit(0);
             $cSession = curl_init();
             //step2
-            curl_setopt($cSession,CURLOPT_URL,"http://www.toolfetch.com/by-brand/vestil/l/brand:vestil.html?limit=48&p=1");
+            curl_setopt($cSession,CURLOPT_URL,"http://www.toolfetch.com/by-brand/vestil/l/brand:vestil.html?limit=48&p=" . $j);
             curl_setopt($cSession,CURLOPT_RETURNTRANSFER,true);
             curl_setopt($cSession,CURLOPT_HEADER, false);
             //step3
@@ -130,41 +129,59 @@ class Vestilwebscraper {
                 $thiswebsite = $html->load($myresult);
 
                 $informationforgivenpage = $thiswebsite->find(".add-to-box span.price");
-                $productid = $thiswebsite->find("p.product-ids");
+                $information = preg_replace("/[(),$]/", "", $informationforgivenpage);
 
-                foreach ($productid as $productinformation) {
+                $productid = $thiswebsite->find("p.product-ids");
+                $modelNumber = preg_replace("/Part# VES-/", "", $productid);
+
+                foreach ($modelNumber as $productinformation) {
                     echo $productinformation;
                 }
 
-                foreach ($informationforgivenpage as $price) {
+                foreach ($information as $price) {
                     echo $price;
                 }
 
             }
-    }
-
-    function opentip(){
-        $html = new simple_html_dom();
-        $html->load_file("https://www.opentip.com/search.php?keywords=vestil&limit=100");
-
-        $card = $html->find(".item-detail");
-        sleep(3);
-        foreach ($card as $key) {
-
-            $sku = $key->find(".products_sku span");
-
-            $price = $key->find(".products_price");
-
-            foreach ($price as $num) {
-                echo $num;
-            }
-
-            foreach ($sku as $model) {
-                echo $model;
-                echo "<br />";
-            }
-
         }
     }
 
+    function opentip(){
+
+        for($i = 1; $i <= 74; $i++){
+
+            set_time_limit(0);
+
+            $html = new simple_html_dom();
+            $html->load_file("https://www.opentip.com/search.php?keywords=vestil&limit=100&page=" . $i);
+
+            $card = $html->find(".item-detail");
+            sleep(3);
+            foreach ($card as $key) {
+
+                $sku = $key->find(".products_sku span");
+
+                $price = $key->find(".products_price");
+
+                foreach ($price as $num) {
+                    echo $num;
+                }
+
+                foreach ($sku as $model) {
+                    echo $model;
+                    echo "<br />";
+                }
+
+            }
+        }
+
+    }
+
 }
+
+$myWebscraper = new Vestilwebscraper;
+
+$myWebscraper->toolfetch();
+$myWebscraper->hofequipment();
+$myWebscraper->industrialsafety();
+$myWebscraper->opentip();
