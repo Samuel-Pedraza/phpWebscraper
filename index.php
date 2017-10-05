@@ -18,7 +18,7 @@ $app->get('/', function ($request, $response, $args) {
 $app->post('/', function($request, $response, $args){
     $myWebscraper = new Vestilwebscraper;
 
-    $myWebscraper->industrialsafety();
+    $myWebscraper->toolfetch();
 
 });
 
@@ -29,8 +29,7 @@ class Vestilwebscraper {
     function hofequipment() {
 
         set_time_limit(0);
-
-
+        $conn = mysqli_connect('66.112.76.254', 'root', 'adamserver5', 'sams_test_database');
         if(!$conn) {
         	echo 'Failed to Connect';
         }
@@ -157,12 +156,14 @@ class Vestilwebscraper {
     }
 
     function toolfetch(){
-        // for($j = 1; $j <= 142; $j++){
+
+
+        for($j = 1; $j <= 142; $j++){
             //step1
             set_time_limit(0);
             $cSession = curl_init();
             //step2
-            curl_setopt($cSession,CURLOPT_URL,"http://www.toolfetch.com/by-brand/vestil/l/brand:vestil.html?limit=48&p=" . $j);
+            curl_setopt($cSession,CURLOPT_URL,"http://www.toolfetch.com/by-brand/vestil/l/brand:vestil.html?limit=48&p=1");
             curl_setopt($cSession,CURLOPT_RETURNTRANSFER,true);
             curl_setopt($cSession,CURLOPT_HEADER, false);
             //step3
@@ -190,30 +191,29 @@ class Vestilwebscraper {
                 $myhtml = new simple_html_dom();
                 $thiswebsite = $html->load($myresult);
 
-                $informationforgivenpage = $thiswebsite->find(".add-to-box span.price");
+                $informationforgivenpage = $thiswebsite->find(".add-to-box .price", 0)->plaintext;
                 $information = preg_replace("/[(),$]/", "", $informationforgivenpage);
 
-                $productid = $thiswebsite->find("p.product-ids");
+                $productid = $thiswebsite->find(".product-ids", 0)->plaintext;
                 $modelNumber = preg_replace("/Part# VES-/", "", $productid);
 
                 $myArray = [];
+                $sku = $modelNumber;
+                $price = $information;
+                $url = $key->href;
+                $website = "toolfetch";
 
-                foreach ($modelNumber as $productinformation) {
-                    array_push($myArray, $productinformation->innertext);
-                    array_push($myArray, $key->href);
-                }
-
-                foreach ($information as $price) {
-                    array_push($myArray, $price->innertext);
-                }
-
-
+                mysqli_query($conn, "SELECT * FROM test_data");
+                mysqli_query($conn, "INSERT INTO test_data(sku, price, website, url) VALUES ('$sku', '$price', '$website', '$url')");
 
             }
-        // }
+            mysqli_close($conn);
+     }
     }
 
     function opentip(){
+
+
 
         for($i = 1; $i <= 74; $i++){
 
