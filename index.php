@@ -1,26 +1,28 @@
 <?php
-// use \Psr\Http\Message\ServerRequestInterface as Request;
-// use \Psr\Http\Message\ResponseInterface as Response;
-// use Slim\Views\PhpRenderer;
-//
-// require 'vendor/autoload.php';
+use \Psr\Http\Message\ServerRequestInterface as Request;
+use \Psr\Http\Message\ResponseInterface as Response;
+use Slim\Views\PhpRenderer;
+
+require 'vendor/autoload.php';
 
 include("simple_html_dom.php");
-//
-// $app = new \Slim\App();
-// $container = $app->getContainer();
-// $container['renderer'] = new PhpRenderer("./templates");
-//
-// $app->get('/', function ($request, $response, $args) {
-//     return $this->renderer->render($response, "/home.php", $args);
-// });
-//
-// $app->post('/getVestil', function($request, $response, $args){
 
+$app = new \Slim\App();
+$container = $app->getContainer();
+$container['renderer'] = new PhpRenderer("./templates");
 
-// });
+$app->get('/', function ($request, $response, $args) {
+    return $this->renderer->render($response, "/home.php", $args);
+});
 
-// $app->run();
+$app->post('/', function($request, $response, $args){
+    $myWebscraper = new Vestilwebscraper;
+
+    $myWebscraper->hofequipment();
+
+});
+
+$app->run();
 
 class Vestilwebscraper {
 
@@ -28,9 +30,14 @@ class Vestilwebscraper {
 
         set_time_limit(0);
 
+
+        if(!$conn) {
+        	echo 'Failed to Connect';
+        }
+
         $html = new simple_html_dom();
 
-        $html->load_file("http://hofequipment.com/cart.php?m=search_results&catID=&venID=1&search=&shopByPrice=&sortBy=&viewAll=1");
+        $html->load_file("http://hofequipment.com/cart.php?m=search_results&search=FOLD-UP+ALUMINUM+PLATFORM+TRUCK");
 
         $query = $html->find(".grid__item div.btn-group a");
 
@@ -39,33 +46,72 @@ class Vestilwebscraper {
                 $grabProducts = new simple_html_dom();
 
                 $grabProducts->load_file($key->href);
-                sleep(3);
 
                 if($grabProducts->find("table.responsive_tables tbody tr") == True){
                     foreach ($grabProducts->find("table.responsive_tables tbody tr") as $tr) {
 
+                        $productInfoArray = [];
+
                         foreach ($tr->find("td[data-title=SKU]") as $sku) {
-                            echo $sku;
+
+                            array_push($productInfoArray, $sku->innertext);
                         }
 
                         foreach ($tr->find("td[data-title=Price]") as $price) {
-                            $mprice = preg_replace("/[(),$]/", "", $price);
-                            echo $mprice . "<br />";
+                            $mprice = preg_replace("/[(),$]/", "", $price->innertext);
+
+
+                            array_push($productInfoArray, $mprice);
                         }
 
-                    }
-                } else {
-                    foreach ($tr->find("span.field-value") as $sku) {
-                        echo $sku;
+                        $skuNumber = current($productInfoArray);
+                        $price     = next($productInfoArray);
+                        $website   = "hofequipment";
+                        $url       = $key->href;
+
+                        if($skuNumber && $price){
+                            echo $skuNumber . " " . $price . " " . $website . " " . $url . " <br />";
+
+                            mysqli_query($conn, "SELECT * FROM vestil_products");
+                            mysqli_query($conn, "INSERT INTO vestil_products(model_number, price, website, url)
+                                                 VALUES ('$skuNumber', '$price', '$website', '$url')");
+                        }
                     }
 
-                    foreach ($tr->find("#price") as $price) {
-                        $mprice = preg_replace("/[(),$]/", "", $price);
-                        echo $mprice . "<br />";
+                } else {
+
+                    $productInfoArray = [];
+
+                    foreach ($grabProducts->find("span[itemprop=sku]") as $sku) {
+                        array_push($productInfoArray, $sku->innertext);
+                    }
+
+                    foreach ($grabProducts->find("div.item-price--product") as $price) {
+                        $mprice = preg_replace("/[(),$]/", "", $price->innertext);
+
+
+                        array_push($productInfoArray, $mprice);
+                    }
+
+                    $skuNumber = current($productInfoArray);
+                    $price     = next($productInfoArray);
+                    $website   = "hofequipment";
+                    $url       = $key->href;
+
+                    if($skuNumber && $price){
+                        echo $skuNumber . " " . $price . " " . $website . " " . $url . " <br />";
+
+                        print_r($productInfoArray);
+
+                        mysqli_query($conn,"SELECT * FROM vestil_products");
+                        mysqli_query($conn, "INSERT INTO vestil_products(model_number, price, website, url)
+                                             VALUES ('$skuNumber', '$price', '$website', '$url')");
+
                     }
                 }
             }
         }
+        mysqli_close($conn);
     }
 
     function industrialsafety(){
@@ -156,7 +202,9 @@ class Vestilwebscraper {
             $html->load_file("https://www.opentip.com/search.php?keywords=vestil&limit=100&page=" . $i);
 
             $card = $html->find(".item-detail");
+
             sleep(3);
+
             foreach ($card as $key) {
 
                 $sku = $key->find(".products_sku span");
@@ -177,11 +225,6 @@ class Vestilwebscraper {
 
     }
 
+
+
 }
-
-$myWebscraper = new Vestilwebscraper;
-
-$myWebscraper->toolfetch();
-$myWebscraper->hofequipment();
-$myWebscraper->industrialsafety();
-$myWebscraper->opentip();
