@@ -18,7 +18,7 @@ $app->get('/', function ($request, $response, $args) {
 $app->post('/', function($request, $response, $args){
     $myWebscraper = new Vestilwebscraper;
 
-    $myWebscraper->hofequipment();
+    $myWebscraper->industrialsafety();
 
 });
 
@@ -30,6 +30,7 @@ class Vestilwebscraper {
 
         set_time_limit(0);
 
+        $conn = mysqli_connect('66.112.76.254', 'root', 'adamserver5', 'test_data');
 
         if(!$conn) {
         	echo 'Failed to Connect';
@@ -73,7 +74,7 @@ class Vestilwebscraper {
                             echo $skuNumber . " " . $price . " " . $website . " " . $url . " <br />";
 
                             mysqli_query($conn, "SELECT * FROM vestil_products");
-                            mysqli_query($conn, "INSERT INTO vestil_products(model_number, price, website, url)
+                            mysqli_query($conn, "INSERT INTO vestil_products(sku, price, website, url)
                                                  VALUES ('$skuNumber', '$price', '$website', '$url')");
                         }
                     }
@@ -104,7 +105,7 @@ class Vestilwebscraper {
                         print_r($productInfoArray);
 
                         mysqli_query($conn,"SELECT * FROM vestil_products");
-                        mysqli_query($conn, "INSERT INTO vestil_products(model_number, price, website, url)
+                        mysqli_query($conn, "INSERT INTO vestil_products(sku, price, website, url)
                                              VALUES ('$skuNumber', '$price', '$website', '$url')");
 
                     }
@@ -116,27 +117,43 @@ class Vestilwebscraper {
 
     function industrialsafety(){
         set_time_limit(0);
+
         for($pages = 1; $pages <= 13; $pages++){
             $html = new simple_html_dom();
 
-            $html->load_file("https://industrialsafety.com/catalogsearch/result/index/?p=" . $pages . "&product_list_limit=80&product_list_order=name&q=vestil");
+            $html->load_file("https://industrialsafety.com/catalogsearch/result/index/?p=1&product_list_limit=80&product_list_order=name&q=vestil");
             sleep(3);
             $query = $html->find("div.products-grid .grid-product-type li");
 
             foreach ($query as $product) {
 
+                $infoArray = [];
+
                 foreach ($product->find(".product-item-link") as $sku) {
                     $mySku = trim($sku->plaintext);
                     $skuArray = explode(" ", $mySku);
-                    echo $skuArray[1];
-                    echo "<br />";
+
+                    array_push($infoArray, $skuArray[1]); //[0] skuNum
+                    array_push($infoArray, $sku->href); //[1] href
                 }
 
                 foreach($product->find(".price-wrapper .price") as $price){
-                    echo $price;
+                    $mprice = preg_replace("/[(),$]/", "", $price->innertext);
+                    array_push($infoArray, $mprice); //[2] price
                 }
+
+                $skuNumber = $infoArray[0];
+                $price     = $infoArray[2];
+                $website   = "industrialsafety";
+                $url       = $infoArray[1];
+
+                mysqli_query($conn, "SELECT * FROM test_data");
+                mysqli_query($conn, "INSERT INTO test_data(sku, price, website, url)
+                                     VALUES ('$skuNumber', '$price', '$website', '$url')");
             }
         }
+
+        mysqli_close($conn);
 
     }
 
