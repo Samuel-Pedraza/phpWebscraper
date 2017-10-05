@@ -18,7 +18,7 @@ $app->get('/', function ($request, $response, $args) {
 $app->post('/', function($request, $response, $args){
     $myWebscraper = new Vestilwebscraper;
 
-    $myWebscraper->toolfetch();
+    $myWebscraper->opentip();
 
 });
 
@@ -213,14 +213,12 @@ class Vestilwebscraper {
 
     function opentip(){
 
-
-
-        for($i = 1; $i <= 74; $i++){
+//        for($i = 1; $i <= 74; $i++){
 
             set_time_limit(0);
 
             $html = new simple_html_dom();
-            $html->load_file("https://www.opentip.com/search.php?keywords=vestil&limit=100&page=" . $i);
+            $html->load_file("https://www.opentip.com/search.php?keywords=vestil&limit=100&page=1");
 
             $card = $html->find(".item-detail");
 
@@ -228,21 +226,24 @@ class Vestilwebscraper {
 
             foreach ($card as $key) {
 
-                $sku = $key->find(".products_sku span");
+                $sku = $key->find(".products_sku span", 0)->plaintext;
 
-                $price = $key->find(".products_price");
+                $skuNumber = preg_replace("/SKU: /", "", $sku);
 
-                foreach ($price as $num) {
-                    echo $num;
-                }
+                $price = $key->find(".products_price", 0)->plaintext;
 
-                foreach ($sku as $model) {
-                    echo $model;
-                    echo "<br />";
-                }
+                $myPrice = preg_replace("/[(),$]/", "", $price);
+
+                $href = $key->find(".data a.title", 0)->href;
+
+                $website = "opentip";
+
+                mysqli_query($conn, "SELECT * FROM test_data");
+                mysqli_query($conn, "INSERT INTO test_data(sku, price, website, url) VALUES ('$skuNumber', '$myPrice', '$website', '$href')");
 
             }
-        }
+        //}
+        mysqli_close($conn);
 
     }
 
