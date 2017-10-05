@@ -30,7 +30,6 @@ class Vestilwebscraper {
 
         set_time_limit(0);
 
-        $conn = mysqli_connect('66.112.76.254', 'root', 'adamserver5', 'test_data');
 
         if(!$conn) {
         	echo 'Failed to Connect';
@@ -118,7 +117,7 @@ class Vestilwebscraper {
     function industrialsafety(){
         set_time_limit(0);
 
-        for($pages = 1; $pages <= 13; $pages++){
+        for($pages = 1; $pages <= 14; $pages++){
             $html = new simple_html_dom();
 
             $html->load_file("https://industrialsafety.com/catalogsearch/result/index/?p=1&product_list_limit=80&product_list_order=name&q=vestil");
@@ -158,7 +157,7 @@ class Vestilwebscraper {
     }
 
     function toolfetch(){
-        for($j = 1; $j <= 142; $j++){
+        // for($j = 1; $j <= 142; $j++){
             //step1
             set_time_limit(0);
             $cSession = curl_init();
@@ -197,16 +196,21 @@ class Vestilwebscraper {
                 $productid = $thiswebsite->find("p.product-ids");
                 $modelNumber = preg_replace("/Part# VES-/", "", $productid);
 
+                $myArray = [];
+
                 foreach ($modelNumber as $productinformation) {
-                    echo $productinformation;
+                    array_push($myArray, $productinformation->innertext);
+                    array_push($myArray, $key->href);
                 }
 
                 foreach ($information as $price) {
-                    echo $price;
+                    array_push($myArray, $price->innertext);
                 }
 
+
+
             }
-        }
+        // }
     }
 
     function opentip(){
