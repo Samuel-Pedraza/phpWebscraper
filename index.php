@@ -29,7 +29,7 @@ class Vestilwebscraper {
     function hofequipment() {
 
         set_time_limit(0);
-        $conn = mysqli_connect('66.112.76.254', 'root', 'adamserver5', 'sams_test_database');
+    
         if(!$conn) {
         	echo 'Failed to Connect';
         }
@@ -213,7 +213,7 @@ class Vestilwebscraper {
 
     function opentip(){
 
-//        for($i = 1; $i <= 74; $i++){
+       for($i = 1; $i <= 74; $i++){
 
             set_time_limit(0);
 
@@ -242,7 +242,7 @@ class Vestilwebscraper {
                 mysqli_query($conn, "INSERT INTO test_data(sku, price, website, url) VALUES ('$skuNumber', '$myPrice', '$website', '$href')");
 
             }
-        //}
+        }
         mysqli_close($conn);
 
     }
