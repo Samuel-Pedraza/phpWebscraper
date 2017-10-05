@@ -18,8 +18,15 @@ $app->get('/', function ($request, $response, $args) {
 $app->post('/', function($request, $response, $args){
     $myWebscraper = new Vestilwebscraper;
 
+    $myWebscraper->hofequipment();
+    $myWebscraper->industrialsafety();
+    $myWebscraper->toolfetch();
     $myWebscraper->opentip();
 
+});
+
+$app->get('/vestil', function($request, $response, $args){
+    return $this->renderer->render($response, "/vestil.php", $args);
 });
 
 $app->run();
@@ -29,7 +36,7 @@ class Vestilwebscraper {
     function hofequipment() {
 
         set_time_limit(0);
-    
+
         if(!$conn) {
         	echo 'Failed to Connect';
         }
@@ -246,7 +253,5 @@ class Vestilwebscraper {
         mysqli_close($conn);
 
     }
-
-
 
 }
