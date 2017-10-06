@@ -8,8 +8,14 @@ require 'vendor/autoload.php';
 include("simple_html_dom.php");
 
 $app = new \Slim\App();
+
+//grabs templates for rendering tables in PHP
 $container = $app->getContainer();
 $container['renderer'] = new PhpRenderer("./templates");
+
+//--------------------------//
+// Routing in SLIM framework//
+//--------------------------//
 
 $app->get('/', function ($request, $response, $args) {
     return $this->renderer->render($response, "/home.php", $args);
@@ -17,12 +23,7 @@ $app->get('/', function ($request, $response, $args) {
 
 $app->post('/', function($request, $response, $args){
     $myWebscraper = new Vestilwebscraper;
-
-    $myWebscraper->hofequipment();
-    $myWebscraper->industrialsafety();
-    $myWebscraper->toolfetch();
     $myWebscraper->opentip();
-
 });
 
 $app->get('/vestil', function($request, $response, $args){
@@ -31,97 +32,138 @@ $app->get('/vestil', function($request, $response, $args){
 
 $app->run();
 
+
+
+
+//----------------------------------------------------------------------------------------------------
+//  **VESTIL CLASS**
+//
+//  dependencies:
+//    simple_html_dom -> simplehtmldom.sourceforge.net
+//
+//  functions:
+//    named after website
+//
+//  sqlQuery:
+//    *arguments*      - takes a $skuNumber(string), $price(decimal), $website(string), $url(string), $conn(variable defined as the mysqli_connect)
+//    *functionality*  - takes arguments, and then executes a query to see if record exisits. if exisits, it updates the price. if it does not exist, it creates the record.
+//-----------------------------------------------------------------------------------------------------
+
+
 class Vestilwebscraper {
 
-    function hofequipment() {
+    function sqlQuery($sku, $price, $website, $url, $conn){
+         $result = mysqli_query($conn, "SELECT * FROM test_data WHERE sku = '" . $sku . "' AND website = '" . $website . "' " );
 
-        set_time_limit(0);
+         if($result){
+             mysqli_query($conn, "UPDATE test_data SET price = $price WHERE website = '$website' AND sku = '$sku' " );
+             echo "updated price <br />";
+         } else {
+             mysqli_query($conn, "INSERT INTO test_data(sku, price, website, url) VALUES ($sku, $price, $website, $url)");
+             echo "created price <br />";
+         }
+     }
 
-        if(!$conn) {
-        	echo 'Failed to Connect';
-        }
+     function hofequipment() {
 
-        $html = new simple_html_dom();
+         //necessary so that connection does not time out when webscraping
+         set_time_limit(0);
 
-        $html->load_file("http://hofequipment.com/cart.php?m=search_results&search=FOLD-UP+ALUMINUM+PLATFORM+TRUCK");
+         $conn = mysqli_connect('66.112.76.254', '', '', 'sams_test_database');
 
-        $query = $html->find(".grid__item div.btn-group a");
+         //**need to rewrite**//
+         if(!$conn) {
+             echo 'Failed to Connect';
+         }
 
-        foreach ($query as $key) {
-            if(!(preg_match('/javascript/', $key->href))){
-                $grabProducts = new simple_html_dom();
+         //instantiates object of simple_html_dom(simplehtmldom.sourceforge.net)
+         $html = new simple_html_dom();
 
-                $grabProducts->load_file($key->href);
+         $html->load_file("http://hofequipment.com/cart.php?m=search_results&search=FOLD-UP+ALUMINUM+PLATFORM+TRUCK");
 
-                if($grabProducts->find("table.responsive_tables tbody tr") == True){
-                    foreach ($grabProducts->find("table.responsive_tables tbody tr") as $tr) {
+         //$query is returned as an array
+         $query = $html->find(".grid__item div.btn-group a");
 
-                        $productInfoArray = [];
+         foreach ($query as $key) {
+             //filters out the $key->href that contains the word 'javascript' --- we only want hrefs that are actual links
+             if(!(preg_match('/javascript/', $key->href))){
+                 //reinstantiates object of simple_html_dom(simplehtmldom.sourceforge.net)
 
-                        foreach ($tr->find("td[data-title=SKU]") as $sku) {
+                 //**need to rewrite**//
+                 $grabProducts = new simple_html_dom();
 
-                            array_push($productInfoArray, $sku->innertext);
-                        }
+                 $grabProducts->load_file($key->href);
 
-                        foreach ($tr->find("td[data-title=Price]") as $price) {
-                            $mprice = preg_replace("/[(),$]/", "", $price->innertext);
-
-
-                            array_push($productInfoArray, $mprice);
-                        }
-
-                        $skuNumber = current($productInfoArray);
-                        $price     = next($productInfoArray);
-                        $website   = "hofequipment";
-                        $url       = $key->href;
-
-                        if($skuNumber && $price){
-                            echo $skuNumber . " " . $price . " " . $website . " " . $url . " <br />";
-
-                            mysqli_query($conn, "SELECT * FROM vestil_products");
-                            mysqli_query($conn, "INSERT INTO vestil_products(sku, price, website, url)
-                                                 VALUES ('$skuNumber', '$price', '$website', '$url')");
-                        }
-                    }
-
-                } else {
-
-                    $productInfoArray = [];
-
-                    foreach ($grabProducts->find("span[itemprop=sku]") as $sku) {
-                        array_push($productInfoArray, $sku->innertext);
-                    }
-
-                    foreach ($grabProducts->find("div.item-price--product") as $price) {
-                        $mprice = preg_replace("/[(),$]/", "", $price->innertext);
+                 //**need to rewrite**//
+                 if($grabProducts->find("table.responsive_tables tbody tr") == True){
+                     foreach ($grabProducts->find("table.responsive_tables tbody tr") as $tr) {
 
 
-                        array_push($productInfoArray, $mprice);
-                    }
+                         //productInfoArray holds two values
+                         //[0] holds the sku number for a given product
+                         //[1] hold the price for a given product
+                         $productInfoArray = [];
 
-                    $skuNumber = current($productInfoArray);
-                    $price     = next($productInfoArray);
-                    $website   = "hofequipment";
-                    $url       = $key->href;
+                         foreach ($tr->find("td[data-title=SKU]") as $sku) {
+                             array_push($productInfoArray, $sku->innertext);
+                         }
 
-                    if($skuNumber && $price){
-                        echo $skuNumber . " " . $price . " " . $website . " " . $url . " <br />";
+                         foreach ($tr->find("td[data-title=Price]") as $price) {
+                             //takes out extra formatting that is not needed nor wanted
+                             $editedPrice = preg_replace("/[(),$]/", "", $price->innertext);
+                             array_push($productInfoArray, $editedPrice);
+                         }
 
-                        print_r($productInfoArray);
+                         //grabs first element in array
+                         $skuNumber = current($productInfoArray);
 
-                        mysqli_query($conn,"SELECT * FROM vestil_products");
-                        mysqli_query($conn, "INSERT INTO vestil_products(sku, price, website, url)
-                                             VALUES ('$skuNumber', '$price', '$website', '$url')");
+                         //grabs second element in array
+                         $price     = next($productInfoArray);
 
-                    }
-                }
-            }
-        }
-        mysqli_close($conn);
-    }
+                         //**need to rewrite**//
+                         $website   = "hofequipment";
+
+                         if($skuNumber && $price){
+                             //referes to sqlQuery -- cannot call sqlQuery(a,b,c,d);
+                             $this->sqlQuery($skuNumber, $price, $website, $key->href);
+                         }
+                     }
+
+                 } else {
+
+                     $productInfoArray = [];
+
+                     foreach ($grabProducts->find("span[itemprop=sku]") as $sku) {
+                         array_push($productInfoArray, $sku->innertext);
+                     }
+
+                     foreach ($grabProducts->find("div.item-price--product") as $price) {
+                         $editedPrice = preg_replace("/[(),$]/", "", $price->innertext);
+                         array_push($productInfoArray, $editedPrice);
+                     }
+
+                     //first element in array
+                     $skuNumber = current($productInfoArray);
+
+                     //second element in array
+                     $price     = next($productInfoArray);
+
+                     //**need to rewrite**//
+                     $website  = "hofequipment";
+
+                     if($skuNumber && $price){
+                         $this->sqlQuery($skuNumber, $price, $website, $key->href);
+                     }
+                 }
+             }
+         }
+         mysqli_close($conn);
+     }
 
     function industrialsafety(){
         set_time_limit(0);
+
+        $conn = mysqli_connect('66.112.76.254', '', '', 'sams_test_database');
 
         for($pages = 1; $pages <= 14; $pages++){
             $html = new simple_html_dom();
@@ -152,17 +194,16 @@ class Vestilwebscraper {
                 $website   = "industrialsafety";
                 $url       = $infoArray[1];
 
-                mysqli_query($conn, "SELECT * FROM test_data");
-                mysqli_query($conn, "INSERT INTO test_data(sku, price, website, url)
-                                     VALUES ('$skuNumber', '$price', '$website', '$url')");
+                $this->sqlQuery($skuNumber, $price, $website, $url);
             }
         }
-
         mysqli_close($conn);
 
     }
 
     function toolfetch(){
+
+        $conn = mysqli_connect('66.112.76.254', '', '', 'sams_test_database');
 
 
         for($j = 1; $j <= 142; $j++){
@@ -210,8 +251,7 @@ class Vestilwebscraper {
                 $url = $key->href;
                 $website = "toolfetch";
 
-                mysqli_query($conn, "SELECT * FROM test_data");
-                mysqli_query($conn, "INSERT INTO test_data(sku, price, website, url) VALUES ('$sku', '$price', '$website', '$url')");
+                $this->sqlQuery($sku, $price, $website, $url);
 
             }
             mysqli_close($conn);
@@ -222,10 +262,12 @@ class Vestilwebscraper {
 
        for($i = 1; $i <= 74; $i++){
 
+           $conn = mysqli_connect('66.112.76.254', '', '', 'sams_test_database');
+
             set_time_limit(0);
 
             $html = new simple_html_dom();
-            $html->load_file("https://www.opentip.com/search.php?keywords=vestil&limit=100&page=1");
+            $html->load_file("https://www.opentip.com/search.php?keywords=vestil&limit=100&page=" . $i);
 
             $card = $html->find(".item-detail");
 
@@ -245,13 +287,12 @@ class Vestilwebscraper {
 
                 $website = "opentip";
 
-                mysqli_query($conn, "SELECT * FROM test_data");
-                mysqli_query($conn, "INSERT INTO test_data(sku, price, website, url) VALUES ('$skuNumber', '$myPrice', '$website', '$href')");
+
+                $this->sqlQuery($skuNumber, $myPrice, $website, $href, $conn);
 
             }
         }
         mysqli_close($conn);
-
     }
 
 }
