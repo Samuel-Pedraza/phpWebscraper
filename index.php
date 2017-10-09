@@ -10,11 +10,13 @@ include("simple_html_dom.php");
 $app = new \Slim\App();
 
 //grabs templates for rendering tables in PHP
+//https://github.com/slimphp/PHP-View
 $container = $app->getContainer();
 $container['renderer'] = new PhpRenderer("./templates");
 
 //--------------------------//
 // Routing in SLIM framework//
+//https://www.slimframework.com/docs/objects/router.html
 //--------------------------//
 
 $app->get('/', function ($request, $response, $args) {
@@ -23,11 +25,25 @@ $app->get('/', function ($request, $response, $args) {
 
 $app->post('/', function($request, $response, $args){
     $myWebscraper = new Vestilwebscraper;
+    $myWebscraper->hofequipment();
+    $myWebscraper->industrialsafety();
+    $myWebscraper->toolfetch();
     $myWebscraper->opentip();
 });
 
 $app->get('/vestil', function($request, $response, $args){
-    return $this->renderer->render($response, "/vestil.php", $args);
+    return $this->renderer->render($response, "/table.php", $args);
+});
+
+$app->get('/edit/{id}', function($request, $response, $args){
+    return $this->renderer->render($response, "/edit.php", $args);
+});
+
+
+//to update form
+$app->put('/edit/{id}', function ($request, $response, $args) {
+    // Update book identified by $args['id']
+
 });
 
 $app->run();
@@ -64,7 +80,7 @@ class Vestilwebscraper {
          }
      }
 
-     function hofequipment() {
+    function hofequipment() {
 
          //necessary so that connection does not time out when webscraping
          set_time_limit(0);
