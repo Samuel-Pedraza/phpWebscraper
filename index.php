@@ -24,11 +24,8 @@ $app->get('/', function ($request, $response, $args) {
 });
 
 $app->post('/', function($request, $response, $args){
-    $myWebscraper = new Vestilwebscraper;
-    $myWebscraper->hofequipment();
-    $myWebscraper->industrialsafety();
-    $myWebscraper->toolfetch();
-    $myWebscraper->opentip();
+    $myWebscraper = new LittleGiant;
+    $myWebscraper->globalindustrial();
 });
 
 $app->get('/vestil', function($request, $response, $args){
@@ -43,6 +40,14 @@ $app->get('/edit/{id}', function($request, $response, $args){
 //to update form
 $app->put('/edit/{id}', function ($request, $response, $args) {
     // Update book identified by $args['id']
+    $conn = mysqli_connect('66.112.76.254', '', '', 'sams_test_database');
+
+    $sql = "UPDATE test_data SET price = $price WHERE id = '$id'";
+
+    $result = mysqli_query($conn, $sql);
+
+    mysqli_close($conn);
+
 
 });
 
@@ -309,6 +314,52 @@ class Vestilwebscraper {
             }
         }
         mysqli_close($conn);
+    }
+
+}
+
+/**
+ *
+ */
+class LittleGiant
+{
+    function globalindustrial(){
+        set_time_limit(0);
+
+        $html = new simple_html_dom();
+
+        for ($i=1; $i < 2; $i++) {
+            # code...
+            $html->load_file("http://www.globalindustrial.com/shopByBrandName/L/little-giant?cp=" . $i . "&ps=110");
+
+            $url = $html->find(".grid .prod .title a");
+
+            foreach ($url as $key => $value) {
+                # code...
+
+                $new_webpage = new simple_html_dom();
+
+                $new_webpage->load_file("http://www.globalindustrial.com/" . $value->href );
+
+                $price = $new_webpage->find("span[itemprop=price]");
+
+                $sku = $new_webpage->find(".prodSpec ul li ul li span");
+
+                // foreach ($price as $index => $myprice) {
+                //     echo $myprice;
+                // }
+
+                foreach ($sku as $skuNumber => $valueNumber) {
+                    # code...
+                        if($valueNumber->plaintext == "MODEL"){
+                            echo $valueNumber->plaintext;
+                        }
+                }
+
+                echo "<br />";
+
+            }
+        }
     }
 
 }

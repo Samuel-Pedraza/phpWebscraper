@@ -5,13 +5,35 @@ $sql = "SELECT * FROM test_data WHERE id = " . $id;
 
 $result = mysqli_query($conn, $sql);
 
-echo "<form action=/edit/" . $id .  "method=PUT >";
+echo "<form method=PUT action=/edit/" . $id .  " >";
 foreach ($result as $key => $value) {
     foreach ($value as $key1 => $value1) {
         echo "<div>" . $key1 . "</div>";
-        echo "<input value=" . $value1 . " name=" . $key1 . "/> <br />";
+        echo "<input name = " . $key1 . " value = " . $value1 . "> <br />";
     }
 }
+echo "<br />";
+
 echo "<input type='submit' />";
 echo "</form>";
+
+
+if (isset($_GET["price"])){
+
+    $price = $_GET["price"];
+    $id = $_GET["id"];
+    $website = $_GET["website"];
+    $url = $_GET["url"];
+    $sku = $_GET["sku"];
+
+    $sql = "UPDATE test_data SET price = $price WHERE id = '$id'";
+
+    $result = mysqli_query($conn, $sql);
+
+    echo "updated";
+}
+
+
+mysqli_close($conn);
+
  ?>
