@@ -25,7 +25,7 @@ $app->get('/', function ($request, $response, $args) {
 
 $app->post('/', function($request, $response, $args){
     $myWebscraper = new LittleGiant;
-    $myWebscraper->globalindustrial();
+    $myWebscraper->spill911();
 });
 
 $app->get('/vestil', function($request, $response, $args){
@@ -397,6 +397,41 @@ class LittleGiant
             }
         }
         mysqli_close($conn);
+    }
+
+    function spill911(){
+        //necessary so that connection does not time out when webscraping
+        set_time_limit(0);
+
+        $html = new simple_html_dom();
+
+        $html->load_file("https://www.spill911.com/mm5/merchant.mvc?Screen=SRCH&Store_Code=spill911&search=little+giant&offset=&filter_cat=&filter_cf1=Little+Giant&filter_cf2=&filter_cf3=&PowerSearch_Begin_Only=&sort=&range_low=&range_high=&layout=&searchcatcount=&customfield1=brand&customfield2=&customfield3=&filter_price=&priceranges=1");
+
+        $links = $html->find(".ctgy-layout-info strong a");
+
+        foreach ($links as $key => $value) {
+
+            $new_page = new simple_html_dom();
+
+            $new_page->load_file($value->href);
+
+            $price = $new_page->find("h3.prod-price .price-value");
+
+            $sku = $new_page->find(".product-manufacturer-part");
+
+            foreach ($sku as $key1 => $value1) {
+                $editedPrice = preg_replace("/Manufacturer Part Number:/", "", $value1->plaintext);
+                echo $editedPrice;
+            }
+
+            foreach ($price as $key2 => $value2) {
+                $priceNice = preg_replace("/[(),$]/", "", $value2->innertext);
+                echo $priceNice;
+                echo "<Br />";
+            }
+
+        }
+
     }
 
 }
