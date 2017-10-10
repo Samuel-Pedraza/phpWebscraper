@@ -40,7 +40,7 @@ $app->get('/edit/{id}', function($request, $response, $args){
 //to update form
 $app->put('/edit/{id}', function ($request, $response, $args) {
     // Update book identified by $args['id']
-    $conn = mysqli_connect('66.112.76.254', '', '', 'sams_test_database');
+    $conn = mysqli_connect('', '', '', 'sams_test_database');
 
     $sql = "UPDATE test_data SET price = $price WHERE id = '$id'";
 
@@ -90,7 +90,7 @@ class Vestilwebscraper {
          //necessary so that connection does not time out when webscraping
          set_time_limit(0);
 
-         $conn = mysqli_connect('66.112.76.254', '', '', 'sams_test_database');
+         $conn = mysqli_connect('', '', '', 'sams_test_database');
 
          //**need to rewrite**//
          if(!$conn) {
@@ -184,7 +184,7 @@ class Vestilwebscraper {
     function industrialsafety(){
         set_time_limit(0);
 
-        $conn = mysqli_connect('66.112.76.254', '', '', 'sams_test_database');
+        $conn = mysqli_connect('', '', '', 'sams_test_database');
 
         for($pages = 1; $pages <= 14; $pages++){
             $html = new simple_html_dom();
@@ -224,7 +224,7 @@ class Vestilwebscraper {
 
     function toolfetch(){
 
-        $conn = mysqli_connect('66.112.76.254', '', '', 'sams_test_database');
+        $conn = mysqli_connect('', '', '', 'sams_test_database');
 
 
         for($j = 1; $j <= 142; $j++){
@@ -284,7 +284,7 @@ class Vestilwebscraper {
 
        for($i = 1; $i <= 74; $i++){
 
-           $conn = mysqli_connect('66.112.76.254', '', '', 'sams_test_database');
+           $conn = mysqli_connect('', '', '', 'sams_test_database');
 
             set_time_limit(0);
 
@@ -343,7 +343,7 @@ class LittleGiant
 
         $html = new simple_html_dom();
 
-        $conn = mysqli_connect('66.112.76.254', '', '', 'sams_test_database');
+        $conn = mysqli_connect('', '', '', 'sams_test_database');
 
         if($conn === false){
             die("ERROR: Could not connect. " . mysqli_connect_error());
