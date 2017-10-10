@@ -232,6 +232,7 @@ class Vestilwebscraper {
             set_time_limit(0);
             $cSession = curl_init();
             //step2
+            // this was all copied and pasted --- who knows what it does?
             curl_setopt($cSession,CURLOPT_URL,"http://www.toolfetch.com/by-brand/vestil/l/brand:vestil.html?limit=48&p=1");
             curl_setopt($cSession,CURLOPT_RETURNTRANSFER,true);
             curl_setopt($cSession,CURLOPT_HEADER, false);
@@ -323,14 +324,34 @@ class Vestilwebscraper {
  */
 class LittleGiant
 {
+
+    function sqlQuery($sku, $price, $website, $url, $conn){
+         $result = mysqli_query($conn, "SELECT * FROM test_data WHERE sku = '" . $sku . "' AND website = '" . $website . "' " );
+
+         if(mysqli_num_rows($result) > 0){
+             mysqli_query($conn, "UPDATE test_data SET price = $price WHERE website = '$website' AND sku = '$sku' " );
+             echo "updated price <br />";
+         } else {
+             mysqli_query($conn, "INSERT INTO test_data(sku, price, website, url) VALUES ('$sku', '$price', '$website', '$url') ");
+             echo "created price <br />";
+         }
+     }
+
     function globalindustrial(){
+        //necessary so that connection does not time out when webscraping
         set_time_limit(0);
 
         $html = new simple_html_dom();
 
+        $conn = mysqli_connect('66.112.76.254', '', '', 'sams_test_database');
+
+        if($conn === false){
+            die("ERROR: Could not connect. " . mysqli_connect_error());
+        }
+
         for ($i=1; $i < 2; $i++) {
             # code...
-            $html->load_file("http://www.globalindustrial.com/shopByBrandName/L/little-giant?cp=" . $i . "&ps=110");
+            $html->load_file("http://www.globalindustrial.com/shopByBrandName/L/little-giant?cp=1&ps=110");
 
             $url = $html->find(".grid .prod .title a");
 
@@ -345,21 +366,37 @@ class LittleGiant
 
                 $sku = $new_webpage->find(".prodSpec ul li ul li span");
 
-                // foreach ($price as $index => $myprice) {
-                //     echo $myprice;
-                // }
 
-                foreach ($sku as $skuNumber => $valueNumber) {
-                    # code...
-                        if($valueNumber->plaintext == "MODEL"){
-                            echo $valueNumber->plaintext;
-                        }
+                $myArray = [];
+
+
+                foreach ($sku as $mykey => $myvalue) {
+                    if($myvalue->plaintext == "MODEL "){
+                        array_push($myArray, $sku[$mykey + 1]->plaintext);
+                    }
                 }
 
-                echo "<br />";
+                foreach ($price as $index => $myprice) {
+                    array_push($myArray, $myprice->plaintext);
+                }
 
+
+                //grabs first element in array
+                $sku = current($myArray);
+
+                //grabs second element in array
+                $price   = next($myArray);
+
+                $url = "http://www.globalindustrial.com/" . $value->href;
+
+                $website = "globalindustrial";
+
+                echo $sku . " " . $price . " " . $url . " " . $website . "<br />";
+
+                $this->sqlQuery($sku, $price, $website, $url, $conn);
             }
         }
+        mysqli_close($conn);
     }
 
 }

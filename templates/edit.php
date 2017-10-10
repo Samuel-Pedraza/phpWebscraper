@@ -17,6 +17,7 @@ echo "<br />";
 echo "<input type='submit' />";
 echo "</form>";
 
+echo "<a href='/vestil'>Back</a>";
 
 if (isset($_GET["price"])){
 
