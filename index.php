@@ -25,7 +25,7 @@ $app->get('/', function ($request, $response, $args) {
 
 $app->post('/', function($request, $response, $args){
     $myWebscraper = new LittleGiant;
-    $myWebscraper->spill911();
+    $myWebscraper->custommhs();
 });
 
 $app->get('/vestil', function($request, $response, $args){
@@ -40,7 +40,7 @@ $app->get('/edit/{id}', function($request, $response, $args){
 //to update form
 $app->put('/edit/{id}', function ($request, $response, $args) {
     // Update book identified by $args['id']
-    $conn = mysqli_connect('', '', '', 'sams_test_database');
+    $conn = mysqli_connect('66.112.76.254', 'root', 'adamserver5', 'sams_test_database');
 
     $sql = "UPDATE test_data SET price = $price WHERE id = '$id'";
 
@@ -90,7 +90,7 @@ class Vestilwebscraper {
          //necessary so that connection does not time out when webscraping
          set_time_limit(0);
 
-         $conn = mysqli_connect('', '', '', 'sams_test_database');
+         $conn = mysqli_connect('66.112.76.254', 'root', 'adamserver5', 'sams_test_database');
 
          //**need to rewrite**//
          if(!$conn) {
@@ -224,7 +224,7 @@ class Vestilwebscraper {
 
     function toolfetch(){
 
-        $conn = mysqli_connect('', '', '', 'sams_test_database');
+        $conn = mysqli_connect('66.112.76.254', 'root', 'adamserver5', 'sams_test_database');
 
 
         for($j = 1; $j <= 142; $j++){
@@ -284,7 +284,7 @@ class Vestilwebscraper {
 
        for($i = 1; $i <= 74; $i++){
 
-           $conn = mysqli_connect('', '', '', 'sams_test_database');
+           $conn = mysqli_connect('66.112.76.254', 'root', 'adamserver5', 'sams_test_database');
 
             set_time_limit(0);
 
@@ -342,7 +342,7 @@ class LittleGiant {
 
         $html = new simple_html_dom();
 
-        $conn = mysqli_connect('', '', '', 'sams_test_database');
+        $conn = mysqli_connect('66.112.76.254', 'root', 'adamserver5', 'sams_test_database');
 
         if($conn === false){
             die("ERROR: Could not connect. " . mysqli_connect_error());
@@ -437,7 +437,7 @@ class LittleGiant {
     function industrialsafety(){
         set_time_limit(0);
 
-        $conn = mysqli_connect('', '', '', 'sams_test_database');
+        $conn = mysqli_connect('66.112.76.254', '', '', 'sams_test_database');
 
         for($pages = 1; $pages <= 14; $pages++){
             $html = new simple_html_dom();
@@ -475,6 +475,35 @@ class LittleGiant {
 
     }
 
+    function custommhs(){
+        $html = new simple_html_dom();
+
+        $html->load_file("https://www.custommhs.com/index.php?route=product/manufacturer&manufacturer_id=50");
+
+        $modelNumber = $html->find(".smallBoxBg ul li a");
+
+        $price = $html->find(".smallBoxBg ul li span");
+
+        $plainTextModelNumbers = array();
+
+        foreach ($modelNumber as $key => $value) {
+            $mykey = $value->plaintext;
+            array_push($plainTextModelNumbers, $mykey);
+        }
+
+        $newArray = array_combine($plainTextModelNumbers, $price);
+
+        foreach ($newArray as $key => $value) {
+            echo $key;
+            echo $value->plaintext;
+            echo "<br />";
+        }
+
+    }
+
+
+
+
     // walmart -> https://developer.walmartlabs.com/docs
 
     //fastenal -> https://www.fastenal.com/products?term=Little+Giant%5BREG%5D&r=~%7Cmanufacturer:%5E%22Little%20Giant[REG]%22$%7C~&pageno=1
@@ -494,4 +523,17 @@ class LittleGiant {
     //metalcabinetstore --> http://metalcabinetstore.com/shopping/shopdisplayproducts.asp?Search=Yes&sppp=21&page=1&category=ALL&highprice=0&lowprice=0&allwords=little%20giant&exact=&atleast=&without=&cprice=&searchfields=
 
     //bizchair --> https://www.bizchair.com/search?q=little%20giant&prefn1=brand&prefv1=Little%20Giant
+
+     //industrialproducts.com,
+
+     //source4industries.com,
+
+     //zorinmaterial.com
+
+      //nextag.com
+
+      //bmhequipment.com
+
+      // northerntool.com
+
 }
