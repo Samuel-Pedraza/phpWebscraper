@@ -322,8 +322,7 @@ class Vestilwebscraper {
 /**
  *
  */
-class LittleGiant
-{
+class LittleGiant {
 
     function sqlQuery($sku, $price, $website, $url, $conn){
          $result = mysqli_query($conn, "SELECT * FROM test_data WHERE sku = '" . $sku . "' AND website = '" . $website . "' " );
@@ -434,4 +433,65 @@ class LittleGiant
 
     }
 
+    // edit fully
+    function industrialsafety(){
+        set_time_limit(0);
+
+        $conn = mysqli_connect('', '', '', 'sams_test_database');
+
+        for($pages = 1; $pages <= 14; $pages++){
+            $html = new simple_html_dom();
+
+            $html->load_file("https://industrialsafety.com/catalogsearch/result/index/?p=1&product_list_limit=80&product_list_order=name&q=vestil");
+            sleep(3);
+            $query = $html->find("div.products-grid .grid-product-type li");
+
+            foreach ($query as $product) {
+
+                $infoArray = [];
+
+                foreach ($product->find(".product-item-link") as $sku) {
+                    $mySku = trim($sku->plaintext);
+                    $skuArray = explode(" ", $mySku);
+
+                    array_push($infoArray, $skuArray[1]); //[0] skuNum
+                    array_push($infoArray, $sku->href); //[1] href
+                }
+
+                foreach($product->find(".price-wrapper .price") as $price){
+                    $mprice = preg_replace("/[(),$]/", "", $price->innertext);
+                    array_push($infoArray, $mprice); //[2] price
+                }
+
+                $skuNumber = $infoArray[0];
+                $price     = $infoArray[2];
+                $website   = "industrialsafety";
+                $url       = $infoArray[1];
+
+                $this->sqlQuery($skuNumber, $price, $website, $url);
+            }
+        }
+        mysqli_close($conn);
+
+    }
+
+    // walmart -> https://developer.walmartlabs.com/docs
+
+    //fastenal -> https://www.fastenal.com/products?term=Little+Giant%5BREG%5D&r=~%7Cmanufacturer:%5E%22Little%20Giant[REG]%22$%7C~&pageno=1
+
+    //northern equipment -> http://www.northerntool.com/shop/tools/category_little-giant http://www.northerntool.com/shop/tools/category_little-giant-hand-truck http://www.northerntool.com/shop/tools/category_little-giant-ladder
+
+    // zoro --> https://www.zoro.com/search?q=little+giant&brand=LITTLE+GIANT&page=2
+
+    // sodyinc --> http://www.sodyinc.com/little-giant?zenid=8jgptlkbvjb37gp72f9hfnqmr7
+
+    // shop.com --> http://developer.shop.com/
+
+    //hayneedle --> https://search.hayneedle.com/search/index.cfm?categoryId=0&selectedFacets=Brand%7CLittle%2520Giant~%5E&page=1&sortBy=preferred&checkCache=true&qs=&fm=&pageType=SEARCH&view=48&Ntt=little%20giant
+
+    //source4industries --> https://source4industries.com/index.php?route=product/manufacturer/info&manufacturer_id=31
+
+    //metalcabinetstore --> http://metalcabinetstore.com/shopping/shopdisplayproducts.asp?Search=Yes&sppp=21&page=1&category=ALL&highprice=0&lowprice=0&allwords=little%20giant&exact=&atleast=&without=&cprice=&searchfields=
+
+    //bizchair --> https://www.bizchair.com/search?q=little%20giant&prefn1=brand&prefv1=Little%20Giant
 }
