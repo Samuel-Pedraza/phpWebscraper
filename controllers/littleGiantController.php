@@ -1,5 +1,19 @@
 <?php
 
+
+    //walmart -> https://developer.walmartlabs.com/docs
+
+    //fastenal -> https://www.fastenal.com/products?term=Little+Giant%5BREG%5D&r=~%7Cmanufacturer:%5E%22Little%20Giant[REG]%22$%7C~&pageno=1
+
+    //northern equipment -> http://www.northerntool.com/shop/tools/category_little-giant http://www.northerntool.com/shop/tools/category_little-giant-hand-truck http://www.northerntool.com/shop/tools/category_little-giant-ladder
+
+    //zoro --> https://www.zoro.com/search?q=little+giant&brand=LITTLE+GIANT&page=2
+
+    //sodyinc --> http://www.sodyinc.com/little-giant?zenid=8jgptlkbvjb37gp72f9hfnqmr7
+
+    //shop.com --> http://developer.shop.com/
+
+
 class LittleGiant {
 
     function sqlQuery($sku, $price, $website, $url, $conn){
@@ -111,7 +125,6 @@ class LittleGiant {
 
     }
 
-    // edit fully
     function industrialsafety(){
         set_time_limit(0);
 
@@ -179,7 +192,6 @@ class LittleGiant {
 
     }
 
-
     function source4industries(){
 
         $html = new simple_html_dom();
@@ -200,6 +212,20 @@ class LittleGiant {
         }
 
     }
+
+    function industrialproducts(){
+        $html = new simple_html_dom("https://www.industrialproducts.com/search/show/all?cat=0&q=little+giant");
+
+        $urls = $html->find(".category-products .products-grid li div h2.product-name a");
+
+        foreach ($urls as $key => $value) {
+            echo $value->href;
+            echo "<br />";
+        }
+
+    }
+
+}
 
 
 

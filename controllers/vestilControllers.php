@@ -1,5 +1,22 @@
 <?php
 
+
+
+//----------------------------------------------------------------------------------------------------
+//  **VESTIL CLASS**
+//
+//  dependencies:
+//    simple_html_dom -> simplehtmldom.sourceforge.net
+//
+//  functions:
+//    named after website
+//
+//  sqlQuery:
+//    *arguments*      - takes a $skuNumber(string), $price(decimal), $website(string), $url(string), $conn(variable defined as the mysqli_connect)
+//    *functionality*  - takes arguments, and then executes a query to see if record exisits. if exisits, it updates the price. if it does not exist, it creates the record.
+//-----------------------------------------------------------------------------------------------------
+
+
 class Vestilwebscraper {
 
     function sqlQuery($sku, $price, $website, $url, $conn){
