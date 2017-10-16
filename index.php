@@ -38,6 +38,10 @@ $app->get('/edit/{id}', function($request, $response, $args){
     return $this->renderer->render($response, "/edit.php", $args);
 });
 
+$app->get('/lowest', function($request, $response, $args){
+    return $this->renderer->render($response, "/lowestprice.php", $args);
+});
+
 
 //to update form
 $app->put('/edit/{id}', function ($request, $response, $args) {

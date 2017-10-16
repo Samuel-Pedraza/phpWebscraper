@@ -168,6 +168,9 @@ class Vestilwebscraper {
 
     }
 
+
+    //https://stackoverflow.com/questions/12164196/warning-file-get-contents-failed-to-open-stream-redirection-limit-reached-ab
+    //notes to help understand until i can come in and comment this baby up
     function toolfetch(){
 
         $conn = mysqli_connect('66.112.76.254', '', '', 'sams_test_database');

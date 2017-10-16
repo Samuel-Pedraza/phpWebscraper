@@ -2,7 +2,7 @@
 
     $conn = mysqli_connect('66.112.76.254', '', '', 'sams_test_database');
 
-    $sql = "SELECT * FROM test_data WHERE website = 'opentip' ";
+    $sql = "SELECT * FROM little_giant_products WHERE  ";
 
     $result = mysqli_query($conn, $sql);
 

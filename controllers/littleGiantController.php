@@ -17,17 +17,20 @@
 class LittleGiant {
 
     function sqlQuery($sku, $price, $website, $url, $conn){
-         $result = mysqli_query($conn, "SELECT * FROM test_data WHERE sku = '" . $sku . "' AND website = '" . $website . "' " );
+         $result = mysqli_query($conn, "SELECT * FROM little_giant_products WHERE sku = '" . $sku . "' AND website = '" . $website . "' " );
 
          if(mysqli_num_rows($result) > 0){
-             mysqli_query($conn, "UPDATE test_data SET price = $price WHERE website = '$website' AND sku = '$sku' " );
+             mysqli_query($conn, "UPDATE little_giant_products SET price = $price WHERE website = '$website' AND sku = '$sku' " );
              echo "updated price <br />";
          } else {
-             mysqli_query($conn, "INSERT INTO test_data(sku, price, website, url) VALUES ('$sku', '$price', '$website', '$url') ");
+             mysqli_query($conn, "INSERT INTO little_giant_products(sku, price, website, url) VALUES ('$sku', '$price', '$website', '$url') ");
              echo "created price <br />";
          }
      }
 
+     //finished
+
+    //finished
     function globalindustrial(){
         //necessary so that connection does not time out when webscraping
         set_time_limit(0);
@@ -50,6 +53,8 @@ class LittleGiant {
                 # code...
 
                 $new_webpage = new simple_html_dom();
+
+                sleep(2);
 
                 $new_webpage->load_file("http://www.globalindustrial.com/" . $value->href );
 
@@ -90,141 +95,226 @@ class LittleGiant {
         mysqli_close($conn);
     }
 
+    //finished
     function spill911(){
+        //necessary so that connection does not time out when webscraping
+        set_time_limit(0);
+
+        $conn = mysqli_connect('66.112.76.254', '', '', 'sams_test_database');
+
+        if($conn === false){
+            die("ERROR: Could not connect. " . mysqli_connect_error());
+        }
+
+        $html = new simple_html_dom();
+
+
+        $increaseOffsetBy32 = 0;
+
+        for ($i=1; $i <= 47 ; $i++) {
+
+            $html->load_file("https://www.spill911.com/mm5/merchant.mvc?Screen=SRCH2&Store_Code=spill911&search=little+giant&searchoffset=" . $increaseOffsetBy32 . "&Category_Code=&filter_cat=&PowerSearch_Begin_Only=&sort=&range_low=&range_high=&customfield1=brand&filter_cf1=Little+Giant&customfield2=&filter_cf2=&customfield3=&filter_cf3=&psboost=&filter_price=&priceranges=1");
+
+            $links = $html->find(".ctgy-layout-info strong a");
+
+            foreach ($links as $key => $value) {
+
+                $new_page = new simple_html_dom();
+                sleep(2);
+                $new_page->load_file($value->href);
+
+                $price = $new_page->find("h3.prod-price .price-value");
+
+                $sku = $new_page->find(".product-manufacturer-part");
+
+                $myPriceArray = array();
+                $mySkuArray   = array();
+
+                foreach ($sku as $key1 => $value1) {
+                    $editedSku = preg_replace("/Manufacturer Part Number:/", "", $value1->plaintext);
+                    array_push($mySkuArray, $editedSku);
+                }
+
+                foreach ($price as $key2 => $value2) {
+                    $priceNice = preg_replace("/[(),$]/", "", $value2->innertext);
+                    array_push($myPriceArray, $priceNice);
+                }
+
+                $myArray = array_combine($mySkuArray, $myPriceArray);
+
+                foreach ($myArray as $info => $value1) {
+                    $website = "spill911";
+                    $url = "";
+
+                    echo $info . " " . $value1 . " " . $website .  " " . $url;
+
+                    $this->sqlQuery($info, $value1, $website, $url, $conn);
+                }
+            }
+
+            $increaseOffsetBy32 += 32;
+        }
+    }
+
+    //finished
+    function custommhs(){
         //necessary so that connection does not time out when webscraping
         set_time_limit(0);
 
         $html = new simple_html_dom();
 
-        $html->load_file("https://www.spill911.com/mm5/merchant.mvc?Screen=SRCH&Store_Code=spill911&search=little+giant&offset=&filter_cat=&filter_cf1=Little+Giant&filter_cf2=&filter_cf3=&PowerSearch_Begin_Only=&sort=&range_low=&range_high=&layout=&searchcatcount=&customfield1=brand&customfield2=&customfield3=&filter_price=&priceranges=1");
+        $conn = mysqli_connect('66.112.76.254', '', '', 'sams_test_database');
 
-        $links = $html->find(".ctgy-layout-info strong a");
+        if($conn === false){
+            die("ERROR: Could not connect. " . mysqli_connect_error());
+        }
 
-        foreach ($links as $key => $value) {
+        for ($i = 1; $i < 2; $i++) {
 
-            $new_page = new simple_html_dom();
+            $html->load_file("https://www.custommhs.com/index.php?route=product/manufacturer&manufacturer_id=50&page=" . $i);
 
-            $new_page->load_file($value->href);
+            $modelNumber = $html->find(".smallBoxBg ul li a");
 
-            $price = $new_page->find("h3.prod-price .price-value");
+            $price = $html->find(".smallBoxBg ul li span");
 
-            $sku = $new_page->find(".product-manufacturer-part");
+            $plainTextModelNumbers = array();
 
-            foreach ($sku as $key1 => $value1) {
-                $editedPrice = preg_replace("/Manufacturer Part Number:/", "", $value1->plaintext);
-                echo $editedPrice;
+            foreach ($modelNumber as $key => $value) {
+                $mykey = $value->plaintext;
+                array_push($plainTextModelNumbers, $mykey);
             }
 
-            foreach ($price as $key2 => $value2) {
-                $priceNice = preg_replace("/[(),$]/", "", $value2->innertext);
-                echo $priceNice;
-                echo "<Br />";
-            }
+            $newArray = array_combine($plainTextModelNumbers, $price);
 
+            foreach ($newArray as $sku => $price) {
+                echo $key;
+                $priceNice = preg_replace("/[(),$]/", "", $price->plaintext);
+                $website = "custommhs";
+                $url = " ";
+                $this->sqlQuery($sku, $priceNice, $website, $url, $conn);
+            }
         }
 
     }
 
-    function industrialsafety(){
+    //finished
+    function source4industries(){
+        //necessary so that connection does not time out when webscraping
         set_time_limit(0);
 
         $conn = mysqli_connect('66.112.76.254', '', '', 'sams_test_database');
 
-        for($pages = 1; $pages <= 14; $pages++){
-            $html = new simple_html_dom();
-
-            $html->load_file("https://industrialsafety.com/catalogsearch/result/index/?p=1&product_list_limit=80&product_list_order=name&q=vestil");
-            sleep(3);
-            $query = $html->find("div.products-grid .grid-product-type li");
-
-            foreach ($query as $product) {
-
-                $infoArray = [];
-
-                foreach ($product->find(".product-item-link") as $sku) {
-                    $mySku = trim($sku->plaintext);
-                    $skuArray = explode(" ", $mySku);
-
-                    array_push($infoArray, $skuArray[1]); //[0] skuNum
-                    array_push($infoArray, $sku->href); //[1] href
-                }
-
-                foreach($product->find(".price-wrapper .price") as $price){
-                    $mprice = preg_replace("/[(),$]/", "", $price->innertext);
-                    array_push($infoArray, $mprice); //[2] price
-                }
-
-                $skuNumber = $infoArray[0];
-                $price     = $infoArray[2];
-                $website   = "industrialsafety";
-                $url       = $infoArray[1];
-
-                $this->sqlQuery($skuNumber, $price, $website, $url);
-            }
+        if($conn === false){
+            die("ERROR: Could not connect. " . mysqli_connect_error());
         }
-        mysqli_close($conn);
-
-    }
-
-    function custommhs(){
-        $html = new simple_html_dom();
-
-        $html->load_file("https://www.custommhs.com/index.php?route=product/manufacturer&manufacturer_id=50");
-
-        $modelNumber = $html->find(".smallBoxBg ul li a");
-
-        $price = $html->find(".smallBoxBg ul li span");
-
-        $plainTextModelNumbers = array();
-
-        foreach ($modelNumber as $key => $value) {
-            $mykey = $value->plaintext;
-            array_push($plainTextModelNumbers, $mykey);
-        }
-
-        $newArray = array_combine($plainTextModelNumbers, $price);
-
-        foreach ($newArray as $key => $value) {
-            echo $key;
-            echo $value->plaintext;
-            echo "<br />";
-        }
-
-    }
-
-    function source4industries(){
 
         $html = new simple_html_dom();
 
         $html->load_file("https://source4industries.com/index.php?route=product/manufacturer/info&manufacturer_id=31&limit=327");
 
-        $price = $html->find("li .padding .left .price");
+        $price = $html->find("li .price");
 
-        $sku = $html->find(".left .name a");
+        $sku = $html->find(".name a");
 
-        foreach ($sku as $key => $value) {
-            echo $value;
-        }
+
+        $mySku = array();
+        $myPrice = array();
 
         foreach ($price as $key => $value) {
-            echo $value;
-            echo "<br />";
+            $mprice = preg_replace("/[(),$]/", "", $value->innertext);
+            array_push($myPrice, $mprice);
+        }
+
+        foreach ($sku as $skuKey => $skuValue) {
+            $grabLast = explode(" ", $skuValue->plaintext);
+            array_push($mySku, $grabLast[sizeof($grabLast) - 1]);
+        }
+
+        $myArray = array_combine($mySku, $myPrice);
+
+        foreach ($myArray as $info => $value1) {
+            $website = "source4industries";
+            $url = "";
+
+            echo $info . " " . $value1 . " " . $website .  " " . $url;
+
+            $this->sqlQuery($info, $value1, $website, $url, $conn);
         }
 
     }
 
+    //finished???
+    function bizchair(){
+        set_time_limit(0);
+
+        $conn = mysqli_connect('66.112.76.254', '', '', 'sams_test_database');
+
+        $html = new simple_html_dom();
+
+        $itemOffset = 0;
+        $countOfItemsWithDash = 0;
+
+        for($i = 0; $i <= 14; $i++){
+            $html->load_file("https://www.bizchair.com/search?q=Little%20Giant&prefn1=brand&sz=24&start=" . $itemOffset . "&prefv1=Little%20Giant");
+
+            $sku = $html->find(".product-id span[itemprop=productID]");
+
+            $price = $html->find(".product-sales-price");
+
+
+            $newskuarray = array();
+
+            foreach ($sku as $element => $info) {
+                array_push($newskuarray, $info->innertext);
+            }
+
+            $combined = array_combine($newskuarray, $price);
+
+            foreach ($combined as $key => $value) {
+                if(strpos($value, " - ")){
+                    $countOfItemsWithDash += 1;
+                } else {
+                    $myprice = preg_replace("/[(),$]/", "", $value->innertext);
+                    $website = "bizchair";
+                    $url = "";
+
+                    echo $key;
+                    echo $myprice;
+                    echo "<br />";
+                }
+            }
+            $itemOffset += 24;
+        }
+    }
+
+    //
     function industrialproducts(){
-        $html = new simple_html_dom("https://www.industrialproducts.com/search/show/all?cat=0&q=little+giant");
+        set_time_limit(0);
 
-        $urls = $html->find(".category-products .products-grid li div h2.product-name a");
+        $html = new simple_html_dom();
 
-        foreach ($urls as $key => $value) {
-            echo $value->href;
-            echo "<br />";
+        $html->load_file("https://www.industrialproducts.com/search/show/all?cat=0&q=little+giant");
+
+        $info = $html->find(".category-products .products-grid .item div .onsale-category-container-list a");
+
+        foreach ($info as $key => $value) {
+            $new_page = new simple_html_dom();
+            $new_page->load_file($value->href);
+            $search_new_page = $new_page->find("table tr td a");
+
+            foreach ($search_new_page as $link => $url) {
+                $product_page = new simple_html_dom();
+
+                $product_page->load_file($url->href);
+                $search_product_page = $product_page->find(".minimal-price .price");
+
+                foreach ($search_product_page as $box => $price) {
+                    echo $price . "<br />";
+                }
+            }
+
         }
-
     }
-
 }
 
 
