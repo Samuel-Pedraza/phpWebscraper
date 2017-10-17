@@ -295,24 +295,26 @@ class LittleGiant {
 
         $html->load_file("https://www.industrialproducts.com/search/show/all?cat=0&q=little+giant");
 
-        $info = $html->find(".category-products .products-grid .item div .onsale-category-container-list a");
+        $info = $html->find(".catalogsearch-result-index .category-products .products-grid .product-name a");
 
         foreach ($info as $key => $value) {
-            $new_page = new simple_html_dom();
-            $new_page->load_file($value->href);
-            $search_new_page = $new_page->find("table tr td a");
+            if(!(strpos($value->href, "little-giant-sheet-steel-box-trucks-with-hinged-lids.html"))){
+                $new_page = new simple_html_dom();
+                $new_page->load_file($value->href);
+                $table = $new_page->find("table tr td a");
 
-            foreach ($search_new_page as $link => $url) {
-                $product_page = new simple_html_dom();
+                foreach ($table as $a => $link) {
+                    $individual_page = new simple_html_dom();
+                    $individual_page->load_file($link->href);
 
-                $product_page->load_file($url->href);
-                $search_product_page = $product_page->find(".minimal-price .price");
+                    $price = $individual_page->find("span.map");
 
-                foreach ($search_product_page as $box => $price) {
-                    echo $price . "<br />";
+                    foreach ($price as $myKey => $myPrice) {
+                        echo $myPrice;
+                    }
                 }
-            }
 
+            }
         }
     }
 }
