@@ -286,156 +286,6 @@ class LittleGiant {
     }
 
     //i hate industrialproducts
-    function industrialproducts(){
-        set_time_limit(0);
-
-        $myresults = $this->grabNamesFromDatabase(82);
-
-        foreach ($myresults as $beginningKey => $beginningValue) {
-            foreach ($beginningValue as $key => $value) {
-                $new_page = new simple_html_dom();
-                $myurl = "https://www.industrialproducts.com/search?q=" . $value;
-                $new_page->load_file($myurl);
-
-                $table = $new_page->find("table tr td a"); de
-
-                if($table == True){
-                    foreach ($table as $a => $link) {
-                        $individual_page = new simple_html_dom();
-                        $individual_page->load_file($link->href);
-
-                        $price = $individual_page->find("span.map");
-                        $sku   = $individual_page->find(".product-view .product-shop .product-main-info .product-ids");
-
-
-                        $price_array = array();
-                        $sku_array = array();
-
-                        foreach ($price as $myPrice => $myInfo) {
-                            $myprice = preg_replace("/[(),$]/", "", $myInfo->innertext);
-                            array_push($price_array, $myprice);
-                        }
-
-                        foreach ($sku as $mySku => $mySkuInfo) {
-                            $skuNumber = preg_replace("/Product Code: /", "", $mySkuInfo->innertext);
-                            array_push($sku_array, $skuNumber);
-                        }
-
-
-                        $combined_array = array_combine($sku_array, $price_array);
-
-                        foreach ($combined_array as $lastSku => $lastValue) {
-                            $website = "industrialproducts";
-                            $url = "";
-                            $this->sqlQuery($lastSku, $lastValue, $website, $url, $conn);
-                        }
-                    }
-                } else {
-
-                    $price = $new_page->find("span.map");
-                    $sku = $new_page->find(".product-ids");
-
-                    $price_array = array();
-                    $sku_array = array();
-
-                    foreach ($price as $myPrice => $myInfo) {
-                        $myprice = preg_replace("/[(),$]/", "", $myInfo->innertext);
-                        array_push($price_array, $myprice);
-                    }
-
-                    foreach ($sku as $mySku => $mySkuInfo) {
-                        $skuNumber = preg_replace("/Product Code: /", "", $mySkuInfo->innertext);
-                        array_push($sku_array, $skuNumber);
-                    }
-
-                    $combined_array = array_combine($sku_array, $price_array);
-
-                    foreach ($combined_array as $lastSku => $lastValue) {
-                        $website = "industrialproducts";
-                        $url = "";
-                        $this->sqlQuery($lastSku, $lastValue, $website, $url, $conn);
-                    }
-
-                }
-            }
-        }
-
-
-
-        // $conn = mysqli_connect('66.112.76.254', '', '', 'sams_test_database');
-        //
-        // $html->load_file("https://www.industrialproducts.com/search/show/all?cat=0&q=little+giant");
-        //
-        // $info = $html->find(".catalogsearch-result-index .category-products .products-grid .product-name a");
-        //
-        foreach ($info as $key => $value) {
-            if(!(strpos($value->href, "little-giant-sheet-steel-box-trucks-with-hinged-lids.html"))){
-                $new_page = new simple_html_dom();
-                $new_page->load_file($value->href);
-
-                $table = $new_page->find("table tr td a");
-
-                if($table == True){
-                    foreach ($table as $a => $link) {
-                        $individual_page = new simple_html_dom();
-                        $individual_page->load_file($link->href);
-
-                        $price = $individual_page->find("span.map");
-                        $sku   = $individual_page->find(".product-view .product-shop .product-main-info .product-ids");
-
-
-                        $price_array = array();
-                        $sku_array = array();
-
-                        foreach ($price as $myPrice => $myInfo) {
-                            $myprice = preg_replace("/[(),$]/", "", $myInfo->innertext);
-                            array_push($price_array, $myprice);
-                        }
-
-                        foreach ($sku as $mySku => $mySkuInfo) {
-                            $skuNumber = preg_replace("/Product Code: /", "", $mySkuInfo->innertext);
-                            array_push($sku_array, $skuNumber);
-                        }
-
-
-                        $combined_array = array_combine($sku_array, $price_array);
-
-                        foreach ($combined_array as $lastSku => $lastValue) {
-                            $website = "industrialproducts";
-                            $url = "";
-                            $this->sqlQuery($lastSku, $lastValue, $website, $url, $conn);
-                        }
-                    }
-                } else {
-
-                    $price = $new_page->find("span.map");
-                    $sku = $new_page->find(".product-ids");
-
-                    $price_array = array();
-                    $sku_array = array();
-
-                    foreach ($price as $myPrice => $myInfo) {
-                        $myprice = preg_replace("/[(),$]/", "", $myInfo->innertext);
-                        array_push($price_array, $myprice);
-                    }
-
-                    foreach ($sku as $mySku => $mySkuInfo) {
-                        $skuNumber = preg_replace("/Product Code: /", "", $mySkuInfo->innertext);
-                        array_push($sku_array, $skuNumber);
-                    }
-
-                    $combined_array = array_combine($sku_array, $price_array);
-
-                    foreach ($combined_array as $lastSku => $lastValue) {
-                        $website = "industrialproducts";
-                        $url = "";
-                        $this->sqlQuery($lastSku, $lastValue, $website, $url, $conn);
-                    }
-
-                }
-            }
-        }
-    }
 
     function grabNamesFromDatabase($id){
         $conn = mysqli_connect('66.112.76.254', '', '', 'cms');
@@ -445,6 +295,56 @@ class LittleGiant {
         $results = mysqli_query($conn, $sql);
 
         return $results;
+    }
+
+    function sodyinc(){
+        set_time_limit(0);
+
+
+        for ($i=1; $i <= 55; $i++) {
+                # code...
+            $html = new simple_html_dom();
+
+            $html->load_file("http://www.sodyinc.com/little-giant?sort=20a&page=" . $i);
+
+            $myinfo = $html->find("h3.itemTitle a");
+
+            foreach ($myinfo as $key => $value) {
+                $new_url = new simple_html_dom();
+
+                $mydecodedstring = preg_replace("/amp;/", "", $value->href);
+
+                $new_url->load_file($mydecodedstring);
+
+                $my_sku = array();
+                $my_price = array();
+
+                $product_sku = $new_url->find("#productDetailsList li", 0);
+
+                $modified_sku = preg_replace("/Model: /", "", $product_sku->innertext);
+                echo $modified_sku;
+                array_push($my_sku, $modified_sku);
+
+                $product_price = $new_url->find("#productPrices");
+
+                foreach ($product_price as $element => $found) {
+                    $modified_price = preg_replace("/[(),$]/", "", $found->innertext);
+                    echo $modified_price . "<br />";
+                    array_push($my_price, $modified_price);
+                }
+
+
+                $combined_array = array_combine($my_sku, $my_price);
+
+                foreach ($combined_array as $skuNumber => $priceNumber) {
+                    $website = "sodyinc";
+                    $url = "";
+
+                    $this->sqlQuery($skuNumber, $priceNumber, $website, $url, $conn);
+                }
+            }
+        }
+
     }
 }
 

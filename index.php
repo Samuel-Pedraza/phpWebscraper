@@ -27,7 +27,7 @@ $app->get('/', function ($request, $response, $args) {
 
 $app->post('/', function($request, $response, $args){
     $myWebscraper = new LittleGiant;
-    $myWebscraper->industrialproducts();
+    $myWebscraper->sodyinc();
 });
 
 $app->get('/vestil', function($request, $response, $args){
