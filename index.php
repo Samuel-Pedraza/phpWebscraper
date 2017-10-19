@@ -28,6 +28,11 @@ $app->get('/', function ($request, $response, $args) {
 $app->post('/', function($request, $response, $args){
     $myWebscraper = new LittleGiant;
     $myWebscraper->sodyinc();
+    $myWebscraper->globalindustrial();
+    $myWebscraper->spill911();
+    $myWebscraper->custommhs();
+    $myWebscraper->source4industries();
+    $myWebscraper->bizchair();
 });
 
 $app->get('/vestil', function($request, $response, $args){

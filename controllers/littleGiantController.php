@@ -152,6 +152,8 @@ class LittleGiant {
 
             $increaseOffsetBy32 += 32;
         }
+        mysqli_close($conn);
+
     }
 
     //finished
@@ -192,6 +194,7 @@ class LittleGiant {
                 $this->sqlQuery($sku, $priceNice, $website, $url, $conn);
             }
         }
+        mysqli_close($conn);
 
     }
 
@@ -238,6 +241,7 @@ class LittleGiant {
 
             $this->sqlQuery($info, $value1, $website, $url, $conn);
         }
+        mysqli_close($conn);
 
     }
 
@@ -283,6 +287,8 @@ class LittleGiant {
             }
             $itemOffset += 24;
         }
+        mysqli_close($conn);
+
     }
 
     //i hate industrialproducts
@@ -300,6 +306,7 @@ class LittleGiant {
     function sodyinc(){
         set_time_limit(0);
 
+        $conn = mysqli_connect('66.112.76.254', '', '', 'sams_test_database');
 
         for ($i=1; $i <= 55; $i++) {
                 # code...
@@ -322,8 +329,12 @@ class LittleGiant {
                 $product_sku = $new_url->find("#productDetailsList li", 0);
 
                 $modified_sku = preg_replace("/Model: /", "", $product_sku->innertext);
+
                 echo $modified_sku;
+
                 array_push($my_sku, $modified_sku);
+
+                sleep(3);
 
                 $product_price = $new_url->find("#productPrices");
 
@@ -344,10 +355,9 @@ class LittleGiant {
                 }
             }
         }
-
+        mysqli_close($conn);
     }
 }
-
 
 
  ?>
