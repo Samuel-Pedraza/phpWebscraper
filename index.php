@@ -8,6 +8,7 @@ require 'vendor/autoload.php';
 include("simple_html_dom.php");
 include("./controllers/littleGiantController.php");
 include("./controllers/vestilControllers.php");
+include("./controllers/valleycraftController.php");
 
 $app = new \Slim\App();
 
@@ -16,8 +17,16 @@ $app = new \Slim\App();
 $container = $app->getContainer();
 $container['renderer'] = new PhpRenderer("./templates");
 
+
+
+
+
+
 //--------------------------//
 // Routing in SLIM framework//
+//                          //
+//                          //
+//Resource to help:         //
 //https://www.slimframework.com/docs/objects/router.html
 //--------------------------//
 
@@ -27,12 +36,7 @@ $app->get('/', function ($request, $response, $args) {
 
 $app->post('/', function($request, $response, $args){
     $myWebscraper = new LittleGiant;
-    $myWebscraper->sodyinc();
-    $myWebscraper->globalindustrial();
-    $myWebscraper->spill911();
-    $myWebscraper->custommhs();
-    $myWebscraper->source4industries();
-    $myWebscraper->bizchair();
+    $myWebscraper->sustainablesupply();
 });
 
 $app->get('/vestil', function($request, $response, $args){
@@ -46,7 +50,6 @@ $app->get('/edit/{id}', function($request, $response, $args){
 $app->get('/lowest', function($request, $response, $args){
     return $this->renderer->render($response, "/lowestprice.php", $args);
 });
-
 
 //to update form
 $app->put('/edit/{id}', function ($request, $response, $args) {

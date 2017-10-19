@@ -13,6 +13,20 @@
 
     //shop.com --> http://developer.shop.com/
 
+//----------------------------------------------------------------------------------------------------
+//  **LITTLE GIANT CLASS**
+//
+//  dependencies:
+//    simple_html_dom -> simplehtmldom.sourceforge.net
+//
+//  functions:
+//    named after website
+//
+//  sqlQuery:
+//    *arguments*      - takes a $skuNumber(string), $price(decimal), $website(string), $url(string), $conn(variable defined as the mysqli_connect)
+//    *functionality*  - takes arguments, and then executes a query to see if record exisits. if exisits, it updates the price. if it does not exist, it creates the record.
+//-----------------------------------------------------------------------------------------------------
+
 
 class LittleGiant {
 
@@ -28,7 +42,9 @@ class LittleGiant {
          }
      }
 
-    //finished
+    //globalindustrial webscraper
+    //
+
     function globalindustrial(){
         //necessary so that connection does not time out when webscraping
         set_time_limit(0);
@@ -93,7 +109,7 @@ class LittleGiant {
         mysqli_close($conn);
     }
 
-    //finished
+    //
     function spill911(){
         //necessary so that connection does not time out when webscraping
         set_time_limit(0);
@@ -156,7 +172,7 @@ class LittleGiant {
 
     }
 
-    //finished
+    //
     function custommhs(){
         //necessary so that connection does not time out when webscraping
         set_time_limit(0);
@@ -198,7 +214,7 @@ class LittleGiant {
 
     }
 
-    //finished
+    //
     function source4industries(){
         //necessary so that connection does not time out when webscraping
         set_time_limit(0);
@@ -245,7 +261,7 @@ class LittleGiant {
 
     }
 
-    //finished
+    //
     function bizchair(){
         set_time_limit(0);
 
@@ -289,18 +305,6 @@ class LittleGiant {
         }
         mysqli_close($conn);
 
-    }
-
-    //i hate industrialproducts
-
-    function grabNamesFromDatabase($id){
-        $conn = mysqli_connect('66.112.76.254', '', '', 'cms');
-
-        $sql = "SELECT name FROM part a INNER JOIN part_class b on a.classID = b.classID INNER JOIN manufacturer c ON b.manufactID = c.manufactID WHERE c.manufactID = " . $id;
-
-        $results = mysqli_query($conn, $sql);
-
-        return $results;
     }
 
     function sodyinc(){
@@ -356,6 +360,19 @@ class LittleGiant {
             }
         }
         mysqli_close($conn);
+    }
+
+    function sustainablesupply(){
+        $html = new simple_html_dom();
+        $html->load_file("http://www.sustainablesupply.com/search?keywords=little%20giant#filter:custitem_ssc_product_manufacturer:Little$2520Giant/perpage:96/page:2");
+
+        $sku_binding = $html->find("span.sku-code span.ng-binding");
+
+        foreach ($sku_binding as $key => $value) {
+            echo $value . "<br />";
+        }
+
+
     }
 }
 
