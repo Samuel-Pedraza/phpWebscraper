@@ -6,9 +6,7 @@ use Slim\Views\PhpRenderer;
 require 'vendor/autoload.php';
 
 include("simple_html_dom.php");
-include("./controllers/littleGiantController.php");
-include("./controllers/vestilControllers.php");
-include("./controllers/valleycraftController.php");
+include("./models/webModels.php");
 
 $app = new \Slim\App();
 
@@ -16,10 +14,6 @@ $app = new \Slim\App();
 //https://github.com/slimphp/PHP-View
 $container = $app->getContainer();
 $container['renderer'] = new PhpRenderer("./templates");
-
-
-
-
 
 
 //--------------------------//
@@ -35,8 +29,6 @@ $app->get('/', function ($request, $response, $args) {
 });
 
 $app->post('/', function($request, $response, $args){
-    $myWebscraper = new LittleGiant;
-    $myWebscraper->sustainablesupply();
 });
 
 $app->get('/vestil', function($request, $response, $args){
