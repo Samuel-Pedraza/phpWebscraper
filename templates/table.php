@@ -1,6 +1,6 @@
 <?php
 
-    $conn = mysqli_connect('66.112.76.254', '', '', 'sams_test_database');
+    $conn = mysqli_connect('', '', '', '');
 
     $sql = "SELECT * FROM little_giant_products ORDER BY website";
 

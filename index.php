@@ -1,30 +1,33 @@
 <?php
+
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 use Slim\Views\PhpRenderer;
-
 require 'vendor/autoload.php';
-
 include("simple_html_dom.php");
 include("./models/webModels.php");
 
-$app = new \Slim\App();
+
+
 
 //grabs templates for rendering tables in PHP
 //https://github.com/slimphp/PHP-View
+$app = new \Slim\App();
 $container = $app->getContainer();
 $container['renderer'] = new PhpRenderer("./templates");
+
+
+
+
 
 
 //--------------------------//
 //         ROUTES           //
 //                          //
 //                          //
-//Resource to help:         //
-//https://www.slimframework.com/docs/objects/router.html
 //--------------------------//
-
-
+//Resource to help:
+//https://www.slimframework.com/docs/objects/router.html
 
 
 $app->get('/', function ($request, $response, $args) {
@@ -33,7 +36,7 @@ $app->get('/', function ($request, $response, $args) {
 
 $app->post('/vestil', function($request, $response, $args){
     $vestilWebscrapers = new Web;
-    $sql = mysqli_connect("66.112.76.254", "root", "adamserver5", "sams_test_database");
+    $sql = mysqli_connect("", "", "", "");
     $vestilWebscrapers->hofequipment("http://hofequipment.com/cart.php?m=search_results&search=wp-4848", "hofequipment", $sql);
 });
 
@@ -60,7 +63,7 @@ $app->get('/lowest', function($request, $response, $args){
 //to update form
 $app->put('/edit/{id}', function ($request, $response, $args) {
     // Update book identified by $args['id']
-    $conn = mysqli_connect('66.112.76.254', '', '', 'sams_test_database');
+    $conn = mysqli_connect('', '', '', '');
 
     $sql = "UPDATE test_data SET price = $price WHERE id = '$id'";
 

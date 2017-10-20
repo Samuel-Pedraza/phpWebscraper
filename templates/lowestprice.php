@@ -2,7 +2,7 @@
 
 set_time_limit(0);
 
-$conn = mysqli_connect('66.112.76.254', '', '', 'sams_test_database');
+$conn = mysqli_connect('', '', '', '');
 
 $sql = "SELECT sku FROM little_giant_products order by little_giant_products.sku ";
 
