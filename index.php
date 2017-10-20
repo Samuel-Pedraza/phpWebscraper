@@ -17,18 +17,32 @@ $container['renderer'] = new PhpRenderer("./templates");
 
 
 //--------------------------//
-// Routing in SLIM framework//
+//         ROUTES           //
 //                          //
 //                          //
 //Resource to help:         //
 //https://www.slimframework.com/docs/objects/router.html
 //--------------------------//
 
+
+
+
 $app->get('/', function ($request, $response, $args) {
     return $this->renderer->render($response, "/home.php", $args);
 });
 
-$app->post('/', function($request, $response, $args){
+$app->post('/vestil', function($request, $response, $args){
+    $vestilWebscrapers = new Web;
+    $sql = mysqli_connect("66.112.76.254", "root", "adamserver5", "sams_test_database");
+    $vestilWebscrapers->hofequipment("http://hofequipment.com/cart.php?m=search_results&search=wp-4848", "hofequipment", $sql);
+});
+
+$app->post('/littlegiant', function($request, $response, $args){
+
+});
+
+$app->post('/valleycraft', function($request, $response, $args){
+
 });
 
 $app->get('/vestil', function($request, $response, $args){
@@ -53,7 +67,6 @@ $app->put('/edit/{id}', function ($request, $response, $args) {
     $result = mysqli_query($conn, $sql);
 
     mysqli_close($conn);
-
 
 });
 

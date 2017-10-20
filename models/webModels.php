@@ -59,11 +59,12 @@ class Web {
 
                          //grabs second element in array
                          $price     = next($productInfoArray);
+                         $timestamp = date("Y-m-d H:i:s");
 
                          //**need to rewrite**//
                          if($skuNumber && $price){
                              //referes to sqlQuery -- cannot call sqlQuery(a,b,c,d);
-                             $this->sqlQuery($skuNumber, $price, $website, $key->href);
+                             $this->sqlQuery($skuNumber, $price, $website, $key->href, $timestamp, $sqlconnection);
                          }
                      }
 
@@ -85,9 +86,10 @@ class Web {
 
                      //second element in array
                      $price     = next($productInfoArray);
+                     $timestamp = date("Y-m-d H:i:s");
 
                      if($skuNumber && $price){
-                         $this->sqlQuery($skuNumber, $price, $website, $key->href, $sqlconnection);
+                         $this->sqlQuery($skuNumber, $price, $website, $key->href, $timestamp, $sqlconnection);
                      }
                  }
              }
@@ -147,10 +149,12 @@ class Web {
     //https://stackoverflow.com/questions/12164196/warning-file-get-contents-failed-to-open-stream-redirection-limit-reached-ab
     //notes to help understand until i can come in and comment this baby up
 
-    //not finished
-    function toolfetch($url, $website, $sqlconnection){
+    //finished
+    function toolfetch($url, $website, $pagenumbers, $sqlconnection){
 
-        for($j = 1; $j <= 142; $j++){
+        for($j = 1; $j <= $pagenumbers; $j++){
+
+            $myUrl = explode("1", $url);
 
             //step1
             set_time_limit(0);
@@ -158,7 +162,7 @@ class Web {
 
             //step2
             // this was all copied and pasted --- who knows what it does?
-            curl_setopt($cSession,CURLOPT_URL, $url);
+            curl_setopt($cSession,CURLOPT_URL, $myUrl[0] . $j);
             curl_setopt($cSession,CURLOPT_RETURNTRANSFER,true);
             curl_setopt($cSession,CURLOPT_HEADER, false);
 
@@ -213,8 +217,7 @@ class Web {
         }
     }
 
-    //not finished
-    //need to write ability to split url at the end in order to append page number
+    // finished
     function opentip($url, $website, $pagescount, $sqlconnection){
 
        for($i = 1; $i <= $pagescount; $i++){
@@ -311,7 +314,6 @@ class Web {
 
     //finished
     //make sure when passing a url as a variable for this website, you set limit = to an absurb number -- fix this later
-
     function source4industries($url, $website, $sqlconnection){
         //necessary so that connection does not time out when webscraping
         set_time_limit(0);
@@ -495,60 +497,67 @@ class Web {
 
     }
 
-    function sodyinc($url, $website, $pagescount, $sqlconnection){
+    //URL passed should be in the form of http://www.sodyinc.com/little-giant?sort=20a&page=1
+    function sodyinc($url, $website, $page_count, $sql_connection){
+        //ensures no timing out - php has a 30 second timeout otherwise
         set_time_limit(0);
 
+        //takes $url, takes off the '1' and turns string into an array
+        $my_url = explode("1", $url);
 
-        $myUrl = explode("1", $url);
+        //looping through every page on the website
+        //$page_count is length of looping
+        for ($i=1; $i <= $page_count; $i++) {
 
-        for ($i=1; $i <= $pagescount; $i++) {
-                # code...
             $html = new simple_html_dom();
+            //loads url of the page you want to scrape from
+            $html->load_file($my_url[0] . $i);
 
-            $html->load_file($myUrl[0] . $i . $myUrl[1]);
+            $links_of_page = $html->find("h3.itemTitle a");
 
-            $myinfo = $html->find("h3.itemTitle a");
+            foreach ($links_of_page as $key => $individual_links) {
+                $individual_product_page = new simple_html_dom();
 
-            foreach ($myinfo as $key => $value) {
-                $new_url = new simple_html_dom();
+                //takes out amp; from url, or else there will be an error
+                $decode_url = preg_replace("/amp;/", "", $individual_links->href);
 
-                $mydecodedstring = preg_replace("/amp;/", "", $value->href);
+                $individual_product_page->load_file($decode_url);
 
-                $new_url->load_file($mydecodedstring);
-
+                //two arrays declared for sku or price, these will be used later
                 $my_sku = array();
                 $my_price = array();
 
-                $product_sku = $new_url->find("#productDetailsList li", 0);
+                //grabs sku
+                $product_sku = $individual_product_page->find("#productDetailsList li", 0);
 
+                //cleans sku
                 $modified_sku = preg_replace("/Model: /", "", $product_sku->innertext);
 
-                echo $modified_sku;
-
+                //pushes a clean sku number to the sku array
                 array_push($my_sku, $modified_sku);
 
-                sleep(3);
+                //find price
+                $product_price = $individual_product_page->find("#productPrices");
 
-                $product_price = $new_url->find("#productPrices");
-
-                foreach ($product_price as $element => $found) {
-                    $modified_price = preg_replace("/[(),$]/", "", $found->innertext);
-                    echo $modified_price . "<br />";
+                //loops through product price
+                foreach ($product_price as $element => $found_price) {
+                    $modified_price = preg_replace("/[(),$]/", "", $found_price->innertext);
+                    //pushes a clean price number to the price array
                     array_push($my_price, $modified_price);
                 }
 
+                //combined array: key-sku, value->price
                 $combined_array = array_combine($my_sku, $my_price);
 
-                foreach ($combined_array as $skuNumber => $priceNumber) {
-
-                    $this->sqlQuery($skuNumber, $priceNumber, $website, $url, $sqlconnection);
+                foreach ($combined_array as $sku_number => $price_number) {
+                    $this->sqlQuery($sku_number, $price_number, $website, $url, $sql_connection);
                 }
             }
         }
-        mysqli_close($sqlconnection);
+        mysqli_close($sql_connection);
     }
 
-    //not finished
+    //just started writing this webscraper
     function sustainablesupply(){
         $html = new simple_html_dom();
         $html->load_file("http://www.sustainablesupply.com/search?keywords=little%20giant#filter:custitem_ssc_product_manufacturer:Little$2520Giant/perpage:96/page:2");
@@ -560,15 +569,21 @@ class Web {
         }
     }
 
-    //finished
-    function sqlQuery($sku, $price, $website, $url, $conn){
-         $result = mysqli_query($conn, "SELECT * FROM little_giant_products WHERE sku = '" . $sku . "' AND website = '" . $website . "' " );
+    //THIS IS VERY UGLY. I APOLOGIZE.
+    //$sql_connection is for sqli_connection
+    //$tableName is for which table you want to select from
+    //other variables are exactly what they are declared to be
+    function sqlQuery($sku, $price, $website, $url, $time_stamp, $table_name, $sql_connection){
+         $result = mysqli_query($sql_connection, "SELECT * FROM '" . $table_name ."' WHERE sku = '" . $sku . "' AND website = '" . $website . "' " );
 
+         //if there are any results returned, update
          if(mysqli_num_rows($result) > 0){
-             mysqli_query($conn, "UPDATE little_giant_products SET price = $price WHERE website = '$website' AND sku = '$sku' " );
+             mysqli_query($sql_connection, "UPDATE '" . $table_name ."' SET price = $price WHERE website = '$website' AND sku = '$sku' " );
              echo "updated price <br />";
-         } else {
-             mysqli_query($conn, "INSERT INTO little_giant_products(sku, price, website, url) VALUES ('$sku', '$price', '$website', '$url') ");
+         }
+         //else create a BRAND NEW PRODUCT WOW!
+          else {
+             mysqli_query($sql_connection, "INSERT INTO '" . $table_name ."'(sku, price, website, url) VALUES ('$sku', '$price', '$website', '$time_stamp') ");
              echo "created price <br />";
          }
      }

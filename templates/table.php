@@ -2,7 +2,7 @@
 
     $conn = mysqli_connect('66.112.76.254', '', '', 'sams_test_database');
 
-    $sql = "SELECT * FROM little_giant_products WHERE  ";
+    $sql = "SELECT * FROM little_giant_products ORDER BY website";
 
     $result = mysqli_query($conn, $sql);
 
@@ -15,10 +15,7 @@
             # code...
 
             if ($key2 == "website") {
-                #do nothing
-            }
-            elseif ($key2 == "url" ){
-                echo "<td><a href=" . $value2 . ">Opentip</a></td>";
+                echo "<td>" . $value2 . "</td>";
             }
             elseif($key2 == "id" ){
                 echo "<td>
