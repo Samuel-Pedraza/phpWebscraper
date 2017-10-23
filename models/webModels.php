@@ -572,7 +572,7 @@ class Web {
     //$sql_connection is for sqli_connection
     //$tableName is for which table you want to select from
     //other variables are exactly what they are declared to be
-    function sqlQuery($sku, $price, $website, $url, $time_stamp, $table_name, $sql_connection){
+    function sqlQuery($sku, $price, $website, $url, $table_name, $sql_connection){
          $result = mysqli_query($sql_connection, "SELECT * FROM '" . $table_name ."' WHERE sku = '" . $sku . "' AND website = '" . $website . "' " );
 
          //if there are any results returned, update
@@ -581,7 +581,7 @@ class Web {
          }
          //else create a BRAND NEW PRODUCT WOW!
           else {
-             mysqli_query($sql_connection, "INSERT INTO '" . $table_name ."'(sku, price, website, url) VALUES ('$sku', '$price', '$website', '$time_stamp') ");
+             mysqli_query($sql_connection, "INSERT INTO '" . $table_name ."'(model_number, price, website) VALUES ('$sku', '$price', '$website') ");
          }
      }
 
