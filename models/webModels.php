@@ -157,7 +157,7 @@ class Web {
     function industrialsafety($url, $website, $page_numbers, $sql_connection, $table_name){
         set_time_limit(0);
 
-        for($pages = 1; $pages <= 2; $pages++){
+        for($pages = 1; $pages <= $page_numbers; $pages++){
             $html = new simple_html_dom();
 
             #breaks url into an array
@@ -615,13 +615,16 @@ class Web {
     //other variables are exactly what they are declared to be
 
     function sqlQuery($model_number, $price, $website, $table_name, $sql_connection){
-         $result = mysqli_query($sql_connection, "SELECT * FROM '$table_name' WHERE model_number = '$model_number' AND website = '$website'");
+
+         $result = mysqli_query($sql_connection, "SELECT * FROM vestil_products WHERE model_number = '$model_number' AND website = '$website'");
 
          //if there are any results returned, update
          if(mysqli_num_rows($result) > 0){
-             mysqli_query($sql_connection, "UPDATE '$table_name' SET price = $price WHERE website = '$website' AND model_number = '$model_number' " );
+             mysqli_query($sql_connection, "UPDATE vestil_products SET price = $price WHERE website = '$website' AND model_number = '$model_number' " );
+             echo "updated --- not really" . "<br />";
          } else {
-            mysqli_query($sql_connection, "INSERT INTO '$table_name'(model_number, price, website) VALUES ('$model_number', '$price', '$website') ");
+            mysqli_query($sql_connection, "INSERT INTO vestil_products(model_number, price, website) VALUES ('$model_number', $price, '$website') ");
+            echo "created" . "<br />";
          }
      }
 
