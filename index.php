@@ -8,15 +8,11 @@ include("simple_html_dom.php");
 include("./models/webModels.php");
 
 
-
-
 //grabs templates for rendering tables in PHP
 //https://github.com/slimphp/PHP-View
 $app = new \Slim\App();
 $container = $app->getContainer();
 $container['renderer'] = new PhpRenderer("./templates");
-
-
 
 
 
