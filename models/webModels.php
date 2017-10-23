@@ -1,5 +1,89 @@
 <?php
 
+/*
+
+STRUCTURE OF DOCUMENT AND EXPLANATION - please read if making changes.
+
+
+Variables:
+
+    Structure:
+
+        Naming Variables:
+
+            one word:
+                variables are all lowercase --- eg: $url
+
+            two or more words:
+                variables are snake case   ---  eg: $sql_connection
+
+
+        INPUT VARIABLES: variables that must be passed into a given webscraper function
+
+            $url:
+                should be the url that scraping begin at. Includes page number to BEGIN -- related to $page_number
+
+            $website:
+                what website we are webscraping, this is inserted into the database and is also an output variable
+
+            $sql_connection:
+                declares ip, username, password and database using mysqli_connection()
+
+            $table_name:
+                passed to sqlQuery(), so we know what table name to insert or update records, is also an
+
+
+        OUTPUT VARIABLES: variables that are written to the database
+
+            $sku:
+                indicates the sku of a given product
+
+            $price:
+                indicates the price of a given product
+
+            $website:
+                what website we are webscraping, this is inserted into the database and is also an input variable
+
+Functions:
+
+    Structure:
+
+
+        hofequipment()
+            //description
+
+        industrialsafety($url, $website, $page_count, $sql_connection, $table_name)
+            //description
+
+        toolfetch($url, $website, $pagenumbers, $sql_connection, $table_name)
+            //description
+
+        opentip($url, $website, $pagescount, $sql_connection, $table_name)
+            //description
+
+        globalindustrial($url, $website, $pagenumbers, $sql_connection, $table_name)
+            //description
+
+        source4industries($url, $website, $sql_connection, $table_name)
+            //description
+
+        spill911()
+            //description
+
+        custommhs()
+            //description
+
+        bizchair()
+            //description
+
+        sodyinc()
+            //description
+
+        sqlQuery()
+            //description
+
+*/
+
 
 
 class Web {
