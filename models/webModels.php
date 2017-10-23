@@ -268,12 +268,10 @@ class Web {
 
             set_time_limit(0);
 
-            $redefinedUrl = explode("", $url);
-
-            $array_pop(explode("", $url));
+            $redefinedUrl = explode("page=1", $url);
 
             $html = new simple_html_dom();
-            $html->load_file($url . $i);
+            $html->load_file($redefinedUrl[0] . "page=" . $i);
 
             $card = $html->find(".item-detail");
 
@@ -302,19 +300,17 @@ class Web {
         //necessary so that connection does not time out when webscraping
         set_time_limit(0);
 
-        $html = new simple_html_dom();
+        for($i=1; $i < $page_numbers; $i++) {
 
-        if($sql_connection === false){ die("ERROR: Could not connect. " . mysqli_connect_error()); }
+            $myUrl = explode("cp=1", $url);
 
-        for ($i=1; $i < $page_numbers; $i++) {
+            $html = new simple_html_dom();
+            $html->load_file($myUrl[0] . "cp=1" . $i);
 
-            $myUrl = explode("1", $url);
 
-            $html->load_file($myUrl[0] . $i);
+            $document_links = $html->find(".grid .prod .title a");
 
-            $url = $html->find(".grid .prod .title a");
-
-            foreach ($url as $key => $value) {
+            foreach ($document_links as $key => $value) {
 
                 $new_webpage = new simple_html_dom();
 
@@ -329,7 +325,7 @@ class Web {
                 $myArray = [];
 
                 foreach ($sku as $mykey => $myvalue) {
-                    if($myvalue->plaintext == "MODEL "){
+                    if($myvalue->plaintext == "MANUFACTURERS PART NUMBER "){
                         array_push($myArray, $sku[$mykey + 1]->plaintext);
                     }
                 }
@@ -338,15 +334,13 @@ class Web {
                     array_push($myArray, $myprice->plaintext);
                 }
 
-
                 //grabs first element in array
                 $sku = current($myArray);
 
                 //grabs second element in array
-                $price   = next($myArray);
+                $price = next($myArray);
 
                 $url = "http://www.globalindustrial.com/" . $value->href;
-
                 $this->sqlQuery($sku, $price, $website, $table_name, $sql_connection);
             }
         }
@@ -546,7 +540,7 @@ class Web {
 
         //looping through every page on the website
         //$page_count is length of looping
-        for ($i=1; $i <= $page_count; $i++) {
+        for ($i=1; $i <= $page_numbers; $i++) {
 
             $html = new simple_html_dom();
             //loads url of the page you want to scrape from
