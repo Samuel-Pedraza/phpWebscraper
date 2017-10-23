@@ -25,6 +25,8 @@ class Web {
          $query = $html->find(".grid__item div.btn-group a");
 
          foreach ($query as $key) {
+
+             sleep(2);
              //filters out the $key->href that contains the word 'javascript' --- we only want hrefs that are actual links
              if(!(preg_match('/javascript/', $key->href))){
                  //reinstantiates object of simple_html_dom(simplehtmldom.sourceforge.net)
@@ -182,7 +184,7 @@ class Web {
             foreach ($array as $key) {
 
                 $mysession = curl_init();
-
+                sleep(2);
                 //step2
                 curl_setopt($mysession, CURLOPT_URL, $key->href);
                 curl_setopt($mysession, CURLOPT_RETURNTRANSFER, true);
@@ -313,6 +315,7 @@ class Web {
 
     //finished
     //make sure when passing a url as a variable for this website, you set limit = to an absurb number -- fix this later
+    //does not need a sleep function
     function source4industries($url, $website, $sql_connection, $table_name){
         //necessary so that connection does not time out when webscraping
         set_time_limit(0);
@@ -367,7 +370,6 @@ class Web {
         $myUrl = explode("searchoffset", $url);
 
         for ($i=1; $i <= 47 ; $i++) {
-
             $html->load_file($myUrl[0] . "searchoffset" . $increaseOffsetBy32 . $myUrl[1]);
 
             $links = $html->find(".ctgy-layout-info strong a");
@@ -412,19 +414,18 @@ class Web {
     }
 
     //finished
-    function custommhs($url, $website, $pagescount, $sql_connection, $table_name){
+    //no pages_count because this can be loaded and rendered on one page
+    //no sleep function either
+    //perhaps later we can construct an object of each product, as to store the url in the database?
+    function custommhs($url, $website, $sql_connection, $table_name){
         //necessary so that connection does not time out when webscraping
         set_time_limit(0);
 
         $html = new simple_html_dom();
 
-        $myUrl = explode("1", $url);
-
         if($sql_connection === false){ die("ERROR: Could not connect. " . mysqli_connect_error()); }
 
-        for ($i = 1; $i < $pagescount; $i++) {
-
-            $html->load_file($myUrl[0] . $i);
+            $html->load_file($url);
 
             $modelNumber = $html->find(".smallBoxBg ul li a");
 
@@ -447,13 +448,14 @@ class Web {
 
                 $this->sqlQuery($key, $priceNice, $website, $table_name, $sql_connection);
             }
-        }
+
         mysqli_close($sql_connection);
 
     }
 
     //finished
-    function bizchair($url, $website, $pagescount, $sql_connection, $table_name){
+    //will need a sleep function when enabling a work around for prices with more than one item
+    function bizchair($url, $website, $pages_count, $sql_connection, $table_name){
         set_time_limit(0);
 
         $html = new simple_html_dom();
@@ -461,14 +463,13 @@ class Web {
         $itemOffset = 0;
         $countOfItemsWithDash = 0;
 
-        for($i = 0; $i <= $pagescount; $i++){
+        for($i = 0; $i <= $pages_count; $i++){
 
             $html->load_file($url . $itemOffset);
 
             $sku = $html->find(".product-id span[itemprop=productID]");
 
             $price = $html->find(".product-sales-price");
-
 
             $newskuarray = array();
 
@@ -478,6 +479,7 @@ class Web {
 
             $combined = array_combine($newskuarray, $price);
 
+            //counting the price descriptions with a dash, because these must be done by hand/have a work around
             foreach ($combined as $key => $value) {
                 if(strpos($value, " - ")){
                     $countOfItemsWithDash += 1;
@@ -511,6 +513,7 @@ class Web {
 
             $html = new simple_html_dom();
             //loads url of the page you want to scrape from
+            sleep(3);
             $html->load_file($my_url[0] . $i);
 
             $links_of_page = $html->find("h3.itemTitle a");
@@ -572,12 +575,12 @@ class Web {
     //$sql_connection is for sqli_connection
     //$tableName is for which table you want to select from
     //other variables are exactly what they are declared to be
-    function sqlQuery($sku, $price, $website, $url, $table_name, $sql_connection){
-         $result = mysqli_query($sql_connection, "SELECT * FROM '" . $table_name ."' WHERE sku = '" . $sku . "' AND website = '" . $website . "' " );
+    function sqlQuery($sku, $price, $website, $table_name, $sql_connection){
+         $result = mysqli_query($sql_connection, "SELECT * FROM " . $table_name . " WHERE model_number = '" . $sku . "' AND website = '" . $website . "' " );
 
          //if there are any results returned, update
          if(mysqli_num_rows($result) > 0){
-             mysqli_query($sql_connection, "UPDATE '" . $table_name ."' SET price = $price WHERE website = '$website' AND sku = '$sku' " );
+             mysqli_query($sql_connection, "UPDATE '" . $table_name ."' SET price = $price WHERE website = '$website' AND model_number = '$sku' " );
          }
          //else create a BRAND NEW PRODUCT WOW!
           else {
