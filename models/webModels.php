@@ -24,13 +24,16 @@ Variables:
                 should be the url that scraping begin at. Includes page number to BEGIN -- related to $page_number
 
             $website:
-                what website we are webscraping, this is inserted into the database and is also an output variable
+                what website we are webscraping, this is inserted into the database and is also considered an output variable
 
             $sql_connection:
                 declares ip, username, password and database using mysqli_connection()
 
             $table_name:
-                passed to sqlQuery(), so we know what table name to insert or update records, is also an
+                passed to sqlQuery(), so we know what table name to insert or update records
+
+            $page_numbers (not required for every webscraper):
+                tells us how many pages we must make a request to.
 
 
         OUTPUT VARIABLES: variables that are written to the database
@@ -89,7 +92,8 @@ Functions:
 class Web {
     //http://hofequipment.com/cart.php?m=search_results&catID=&venID=1&search=&shopByPrice=&sortBy=&viewAll=1
     //$website
-    //finished
+
+    //need to delete timestamp or incorporate it into the databse
     function hofequipment($url, $website, $sql_connection, $table_name) {
 
          //necessary so that connection does not time out when webscraping
@@ -111,7 +115,8 @@ class Web {
          foreach ($query as $key) {
 
              sleep(2);
-             //filters out the $key->href that contains the word 'javascript' --- we only want hrefs that are actual links
+
+             //filters out the $key->href that contains the word 'javascript' --- we only want hrefs that are actual links --- otherwise this will return javascript functions
              if(!(preg_match('/javascript/', $key->href))){
                  //reinstantiates object of simple_html_dom(simplehtmldom.sourceforge.net)
 
@@ -130,27 +135,27 @@ class Web {
                          //[1] hold the price for a given product
                          $productInfoArray = [];
 
-                         foreach ($tr->find("td[data-title=SKU]") as $sku) {
-                             array_push($productInfoArray, $sku->innertext);
+                         foreach ($tr->find("td[data-title=SKU]") as $mySku) {
+                             array_push($productInfoArray, $mySku->innertext);
                          }
 
-                         foreach ($tr->find("td[data-title=Price]") as $price) {
+                         foreach ($tr->find("td[data-title=Price]") as $myPrice) {
                              //takes out extra formatting that is not needed nor wanted
-                             $editedPrice = preg_replace("/[(),$]/", "", $price->innertext);
+                             $editedPrice = preg_replace("/[(),$]/", "", $myPrice->innertext);
                              array_push($productInfoArray, $editedPrice);
                          }
 
                          //grabs first element in array
-                         $skuNumber = current($productInfoArray);
+                         $sku = current($productInfoArray);
 
                          //grabs second element in array
                          $price     = next($productInfoArray);
                          $timestamp = date("Y-m-d H:i:s");
 
                          //**need to rewrite**//
-                         if($skuNumber && $price){
+                         if($sku && $price){
                              //referes to sqlQuery -- cannot call sqlQuery(a,b,c,d);
-                             $this->sqlQuery($skuNumber, $price, $website, $table_name, $sql_connection);
+                             $this->sqlQuery($sku, $price, $website, $table_name, $sql_connection);
                          }
                      }
 
@@ -158,24 +163,24 @@ class Web {
 
                      $productInfoArray = [];
 
-                     foreach ($grabProducts->find("span[itemprop=sku]") as $sku) {
-                         array_push($productInfoArray, $sku->innertext);
+                     foreach ($grabProducts->find("span[itemprop=sku]") as $mySku) {
+                         array_push($productInfoArray, $mySku->innertext);
                      }
 
-                     foreach ($grabProducts->find("div.item-price--product") as $price) {
-                         $editedPrice = preg_replace("/[(),$]/", "", $price->innertext);
+                     foreach ($grabProducts->find("div.item-price--product") as $myPrice) {
+                         $editedPrice = preg_replace("/[(),$]/", "", $myPrice->innertext);
                          array_push($productInfoArray, $editedPrice);
                      }
 
                      //first element in array
-                     $skuNumber = current($productInfoArray);
+                     $sku = current($productInfoArray);
 
                      //second element in array
                      $price     = next($productInfoArray);
                      $timestamp = date("Y-m-d H:i:s");
 
-                     if($skuNumber && $price){
-                         $this->sqlQuery($skuNumber, $price, $website, $table_name, $sql_connection);
+                     if($sku && $price){
+                         $this->sqlQuery($sku, $price, $website, $table_name, $sql_connection);
                      }
                  }
              }
@@ -185,10 +190,11 @@ class Web {
 
      //finished
 
-    function industrialsafety($url, $website, $page_count, $sql_connection, $table_name){
+
+    function industrialsafety($url, $website, $page_numbers, $sql_connection, $table_name){
         set_time_limit(0);
 
-        for($pages = 1; $pages <= $page_count; $pages++){
+        for($pages = 1; $pages <= $page_numbers; $pages++){
             $html = new simple_html_dom();
 
             #breaks url into an array
@@ -205,12 +211,12 @@ class Web {
 
                  $infoArray = [];
 
-                 foreach ($product->find(".product-item-link") as $sku) {
+                 foreach ($product->find(".product-item-link") as $my_sku) {
 
-                     $skuArray = explode(" ", trim($sku->plaintext));  //
+                     $skuArray = explode(" ", trim($my_sku->plaintext));  //
 
                      array_push($infoArray, $skuArray[1]); //[0] skuNum
-                     array_push($infoArray, $sku->href); //[1] href
+                     array_push($infoArray, $my_sku->href); //[1] href
 
                  }
 
@@ -221,11 +227,11 @@ class Web {
 
                  }
 
-                 $skuNumber = $infoArray[0];
+                 $sku       = $infoArray[0];
                  $price     = $infoArray[2];
                  $url       = $infoArray[1];
 
-                 $this->sqlQuery($skuNumber, $price, $website, $table_name, $sql_connection);
+                 $this->sqlQuery($sku, $price, $website, $table_name, $sql_connection);
             }
         }
 
@@ -236,9 +242,9 @@ class Web {
     //notes to help understand until i can come in and comment this baby up
 
     //finished
-    function toolfetch($url, $website, $pagenumbers, $sql_connection, $table_name){
+    function toolfetch($url, $website, $page_numbers, $sql_connection, $table_name){
 
-        for($j = 1; $j <= $pagenumbers; $j++){
+        for($j = 1; $j <= $page_numbers; $j++){
 
             $myUrl = explode("1", $url);
 
@@ -286,14 +292,11 @@ class Web {
 
                 $informationforgivenpage = $thiswebsite->find(".add-to-box .price", 0)->plaintext;
 
-                $information = preg_replace("/[(),$]/", "", $informationforgivenpage);
+                $price = preg_replace("/[(),$]/", "", $informationforgivenpage);
 
                 $productid = $thiswebsite->find(".product-ids", 0)->plaintext;
-                $modelNumber = preg_replace("/Part# VES-/", "", $productid);
+                $sku = preg_replace("/Part# VES-/", "", $productid);
 
-                $myArray = [];
-                $sku = $modelNumber;
-                $price = $information;
                 $url = $key->href;
 
                 $table_name = "vestil_products";
@@ -304,9 +307,9 @@ class Web {
     }
 
     // finished
-    function opentip($url, $website, $pagescount, $sql_connection, $table_name){
+    function opentip($url, $website, $page_numbers, $sql_connection, $table_name){
 
-       for($i = 1; $i <= $pagescount; $i++){
+       for($i = 1; $i <= $page_numbers; $i++){
 
             set_time_limit(0);
 
@@ -323,24 +326,24 @@ class Web {
 
             foreach ($card as $key) {
 
-                $sku = $key->find(".products_sku span", 0)->plaintext;
+                $skuNumber = $key->find(".products_sku span", 0)->plaintext;
 
-                $skuNumber = preg_replace("/SKU: /", "", $sku);
+                $sku = preg_replace("/SKU: /", "", $skuNumber);
 
-                $price = $key->find(".products_price", 0)->plaintext;
+                $my_price = $key->find(".products_price", 0)->plaintext;
 
-                $myPrice = preg_replace("/[(),$]/", "", $price);
+                $price = preg_replace("/[(),$]/", "", $my_price);
 
                 $href = $key->find(".data a.title", 0)->href;
 
-                $this->sqlQuery($skuNumber, $myPrice, $website, $table_name, $sql_connection);
+                $this->sqlQuery($sku, $price, $website, $table_name, $sql_connection);
             }
         }
         mysqli_close($sql_connection);
     }
 
     //finished
-    function globalindustrial($url, $website, $pagenumbers, $sql_connection, $table_name){
+    function globalindustrial($url, $website, $page_numbers, $sql_connection, $table_name){
         //necessary so that connection does not time out when webscraping
         set_time_limit(0);
 
@@ -348,7 +351,7 @@ class Web {
 
         if($sql_connection === false){ die("ERROR: Could not connect. " . mysqli_connect_error()); }
 
-        for ($i=1; $i < $pagenumbers; $i++) {
+        for ($i=1; $i < $page_numbers; $i++) {
 
             $myUrl = explode("1", $url);
 
@@ -389,15 +392,12 @@ class Web {
 
                 $url = "http://www.globalindustrial.com/" . $value->href;
 
-                echo $sku . " " . $price . " " . $url . " " . $website . "<br />";
-
                 $this->sqlQuery($sku, $price, $website, $table_name, $sql_connection);
             }
         }
         mysqli_close($sql_connection);
     }
 
-    //finished
     //make sure when passing a url as a variable for this website, you set limit = to an absurb number -- fix this later
     //does not need a sleep function
     function source4industries($url, $website, $sql_connection, $table_name){
@@ -464,30 +464,30 @@ class Web {
                 sleep(2);
                 $new_page->load_file($value->href);
 
-                $price = $new_page->find("h3.prod-price .price-value");
+                $my_price = $new_page->find("h3.prod-price .price-value");
 
-                $sku = $new_page->find(".product-manufacturer-part");
+                $my_sku = $new_page->find(".product-manufacturer-part");
 
                 $myPriceArray = array();
                 $mySkuArray   = array();
 
-                foreach ($sku as $key1 => $value1) {
+                foreach ($my_sku as $key1 => $value1) {
                     $editedSku = preg_replace("/Manufacturer Part Number:/", "", $value1->plaintext);
                     array_push($mySkuArray, $editedSku);
                 }
 
-                foreach ($price as $key2 => $value2) {
+                foreach ($my_price as $key2 => $value2) {
                     $priceNice = preg_replace("/[(),$]/", "", $value2->innertext);
                     array_push($myPriceArray, $priceNice);
                 }
 
                 $myArray = array_combine($mySkuArray, $myPriceArray);
 
-                foreach ($myArray as $info => $value1) {
+                foreach ($myArray as $sku => $price) {
 
-                    echo $info . " " . $value1 . " " . $website .  " " . $url;
+                    echo $sku . " " . $price . " " . $website .  " " . $url;
 
-                    $this->sqlQuery($info, $value1, $website, $table_name, $sql_connection);
+                    $this->sqlQuery($sku, $price, $website, $table_name, $sql_connection);
                 }
             }
 
@@ -513,7 +513,7 @@ class Web {
 
             $modelNumber = $html->find(".smallBoxBg ul li a");
 
-            $price = $html->find(".smallBoxBg ul li span");
+            $grab_price = $html->find(".smallBoxBg ul li span");
 
             $plainTextModelNumbers = array();
 
@@ -522,15 +522,15 @@ class Web {
                 array_push($plainTextModelNumbers, $mykey);
             }
 
-            $newArray = array_combine($plainTextModelNumbers, $price);
+            $newArray = array_combine($plainTextModelNumbers, $grab_price);
 
-            foreach ($newArray as $sku => $price) {
-                echo $key;
-                $priceNice = preg_replace("/[(),$]/", "", $price->plaintext);
+            foreach ($newArray as $sku => $unsanitized_price) {
+                echo $sku;
+                $price = preg_replace("/[(),$]/", "", $unsanitized_price->plaintext);
                 $website = "custommhs";
                 $url = " ";
 
-                $this->sqlQuery($key, $priceNice, $website, $table_name, $sql_connection);
+                $this->sqlQuery($sku, $price, $website, $table_name, $sql_connection);
             }
 
         mysqli_close($sql_connection);
@@ -539,7 +539,10 @@ class Web {
 
     //finished
     //will need a sleep function when enabling a work around for prices with more than one item
-    function bizchair($url, $website, $pages_count, $sql_connection, $table_name){
+
+
+    //perhaps grab santizing function and pass for other prices in this document???
+    function bizchair($url, $website, $page_numbers, $sql_connection, $table_name){
         set_time_limit(0);
 
         $html = new simple_html_dom();
@@ -547,34 +550,30 @@ class Web {
         $itemOffset = 0;
         $countOfItemsWithDash = 0;
 
-        for($i = 0; $i <= $pages_count; $i++){
+        for($i = 0; $i <= $page_numbers; $i++){
 
             $html->load_file($url . $itemOffset);
 
-            $sku = $html->find(".product-id span[itemprop=productID]");
+            $grab_sku = $html->find(".product-id span[itemprop=productID]");
 
-            $price = $html->find(".product-sales-price");
+            $grab_price = $html->find(".product-sales-price");
 
             $newskuarray = array();
 
-            foreach ($sku as $element => $info) {
+            foreach ($grab_sku as $element => $info) {
                 array_push($newskuarray, $info->innertext);
             }
 
-            $combined = array_combine($newskuarray, $price);
+            $combined = array_combine($newskuarray, $grab_price);
 
             //counting the price descriptions with a dash, because these must be done by hand/have a work around
-            foreach ($combined as $key => $value) {
+            foreach ($combined as $sku => $unsanitized_price) {
                 if(strpos($value, " - ")){
                     $countOfItemsWithDash += 1;
                 } else {
-                    $myprice = preg_replace("/[(),$]/", "", $value->innertext);
-                    $website = "bizchair";
+                    $price = preg_replace("/[(),$]/", "", $unsanitized_price->innertext);
 
-                    echo $key;
-                    echo $myprice;
-
-                    $this->sqlQuery($key, $myprice, $website, $table_name, $sql_connection);
+                    $this->sqlQuery($sku, $price, $website, $table_name, $sql_connection);
                 }
             }
             $itemOffset += 24;
@@ -584,7 +583,7 @@ class Web {
     }
 
     //URL passed should be in the form of http://www.sodyinc.com/little-giant?sort=20a&page=1
-    function sodyinc($url, $website, $page_count, $sql_connection, $table_name){
+    function sodyinc($url, $website, $page_numbers, $sql_connection, $table_name){
         //ensures no timing out - php has a 30 second timeout otherwise
         set_time_limit(0);
 
@@ -636,8 +635,9 @@ class Web {
                 //combined array: key-sku, value->price
                 $combined_array = array_combine($my_sku, $my_price);
 
-                foreach ($combined_array as $sku_number => $price_number) {
-                    $this->sqlQuery($sku_number, $price_number, $website, $table_name, $sql_connection);                }
+                foreach ($combined_array as $sku => $price) {
+                    $this->sqlQuery($sku, $price, $website, $table_name, $sql_connection);
+                }
             }
         }
         mysqli_close($sql_connection);
@@ -656,7 +656,7 @@ class Web {
     }
 
     //THIS IS VERY UGLY. I APOLOGIZE.
-    //$sql_connection is for sqli_connection
+    //$sql_connection is for mysqli_connection
     //$tableName is for which table you want to select from
     //other variables are exactly what they are declared to be
     function sqlQuery($sku, $price, $website, $table_name, $sql_connection){
