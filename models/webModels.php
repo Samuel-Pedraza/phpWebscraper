@@ -6,13 +6,13 @@ class Web {
     //http://hofequipment.com/cart.php?m=search_results&catID=&venID=1&search=&shopByPrice=&sortBy=&viewAll=1
     //$website
     //finished
-    function hofequipment($url, $website, $sqlconnection) {
+    function hofequipment($url, $website, $sql_connection, $table_name) {
 
          //necessary so that connection does not time out when webscraping
          set_time_limit(0);
 
          //**need to rewrite**//
-         if(!$sqlconnection) {
+         if(!$sql_connection) {
              echo 'Failed to Connect';
          }
 
@@ -64,7 +64,7 @@ class Web {
                          //**need to rewrite**//
                          if($skuNumber && $price){
                              //referes to sqlQuery -- cannot call sqlQuery(a,b,c,d);
-                             $this->sqlQuery($skuNumber, $price, $website, $key->href, $timestamp, $sqlconnection);
+                             $this->sqlQuery($skuNumber, $price, $website, $table_name, $sql_connection);
                          }
                      }
 
@@ -89,20 +89,20 @@ class Web {
                      $timestamp = date("Y-m-d H:i:s");
 
                      if($skuNumber && $price){
-                         $this->sqlQuery($skuNumber, $price, $website, $key->href, $timestamp, $sqlconnection);
+                         $this->sqlQuery($skuNumber, $price, $website, $table_name, $sql_connection);
                      }
                  }
              }
          }
-         mysqli_close($sqlconnection);
+         mysqli_close($sql_connection);
      }
 
      //finished
 
-    function industrialsafety($url, $sqlconnection){
+    function industrialsafety($url, $website, $page_count, $sql_connection, $table_name){
         set_time_limit(0);
 
-        for($pages = 1; $pages <= 14; $pages++){
+        for($pages = 1; $pages <= $page_count; $pages++){
             $html = new simple_html_dom();
 
             #breaks url into an array
@@ -139,18 +139,18 @@ class Web {
                  $price     = $infoArray[2];
                  $url       = $infoArray[1];
 
-                 $this->sqlQuery($skuNumber, $price, $website, $url, $sqlconnection);
+                 $this->sqlQuery($skuNumber, $price, $website, $table_name, $sql_connection);
             }
         }
 
-        mysqli_close($sqlconnection);
+        mysqli_close($sql_connection);
     }
 
     //https://stackoverflow.com/questions/12164196/warning-file-get-contents-failed-to-open-stream-redirection-limit-reached-ab
     //notes to help understand until i can come in and comment this baby up
 
     //finished
-    function toolfetch($url, $website, $pagenumbers, $sqlconnection){
+    function toolfetch($url, $website, $pagenumbers, $sql_connection, $table_name){
 
         for($j = 1; $j <= $pagenumbers; $j++){
 
@@ -210,15 +210,15 @@ class Web {
                 $price = $information;
                 $url = $key->href;
 
-                $this->sqlQuery($sku, $price, $website, $url, $sqlconnection);
-
+                $table_name = "vestil_products";
+                $this->sqlQuery($sku, $price, $website, $table_name, $sql_connection);
             }
-            mysqli_close($sqlconnection);
+            mysqli_close($sql_connection);
         }
     }
 
     // finished
-    function opentip($url, $website, $pagescount, $sqlconnection){
+    function opentip($url, $website, $pagescount, $sql_connection, $table_name){
 
        for($i = 1; $i <= $pagescount; $i++){
 
@@ -247,21 +247,20 @@ class Web {
 
                 $href = $key->find(".data a.title", 0)->href;
 
-                $this->sqlQuery($skuNumber, $myPrice, $website, $href, $sqlconnection);
-
+                $this->sqlQuery($skuNumber, $myPrice, $website, $table_name, $sql_connection);
             }
         }
-        mysqli_close($sqlconnection);
+        mysqli_close($sql_connection);
     }
 
     //finished
-    function globalindustrial($url, $website, $pagenumbers, $sqlconnection){
+    function globalindustrial($url, $website, $pagenumbers, $sql_connection, $table_name){
         //necessary so that connection does not time out when webscraping
         set_time_limit(0);
 
         $html = new simple_html_dom();
 
-        if($sqlconnection === false){ die("ERROR: Could not connect. " . mysqli_connect_error()); }
+        if($sql_connection === false){ die("ERROR: Could not connect. " . mysqli_connect_error()); }
 
         for ($i=1; $i < $pagenumbers; $i++) {
 
@@ -306,19 +305,19 @@ class Web {
 
                 echo $sku . " " . $price . " " . $url . " " . $website . "<br />";
 
-                $this->sqlQuery($sku, $price, $website, $url, $sqlconnection);
+                $this->sqlQuery($sku, $price, $website, $table_name, $sql_connection);
             }
         }
-        mysqli_close($sqlconnection);
+        mysqli_close($sql_connection);
     }
 
     //finished
     //make sure when passing a url as a variable for this website, you set limit = to an absurb number -- fix this later
-    function source4industries($url, $website, $sqlconnection){
+    function source4industries($url, $website, $sql_connection, $table_name){
         //necessary so that connection does not time out when webscraping
         set_time_limit(0);
 
-        if($sqlconnection === false){ die("ERROR: Could not connect. " . mysqli_connect_error()); }
+        if($sql_connection === false){ die("ERROR: Could not connect. " . mysqli_connect_error()); }
 
         $html = new simple_html_dom();
 
@@ -348,18 +347,18 @@ class Web {
 
             echo $info . " " . $value1 . " " . $website .  " " . $url;
 
-            $this->sqlQuery($info, $value1, $website, $url, $sqlconnection);
+            $this->sqlQuery($info, $value1, $website, $table_name, $sql_connection);
         }
 
-        mysqli_close($sqlconnection);
+        mysqli_close($sql_connection);
     }
 
     //finished
-    function spill911($url, $website, $sqlconnection){
+    function spill911($url, $website, $sql_connection, $table_name){
         //necessary so that connection does not time out when webscraping
         set_time_limit(0);
 
-        if($sqlconnection === false){ die("ERROR: Could not connect. " . mysqli_connect_error()); }
+        if($sql_connection === false){ die("ERROR: Could not connect. " . mysqli_connect_error()); }
 
         $html = new simple_html_dom();
 
@@ -402,19 +401,18 @@ class Web {
 
                     echo $info . " " . $value1 . " " . $website .  " " . $url;
 
-                    $this->sqlQuery($info, $value1, $website, $url, $sqlconnection);
-
+                    $this->sqlQuery($info, $value1, $website, $table_name, $sql_connection);
                 }
             }
 
             $increaseOffsetBy32 += 32;
         }
 
-        mysqli_close($sqlconnection);
+        mysqli_close($sql_connection);
     }
 
     //finished
-    function custommhs($url, $website, $pagescount, $sqlconnection){
+    function custommhs($url, $website, $pagescount, $sql_connection, $table_name){
         //necessary so that connection does not time out when webscraping
         set_time_limit(0);
 
@@ -422,7 +420,7 @@ class Web {
 
         $myUrl = explode("1", $url);
 
-        if($sqlconnection === false){ die("ERROR: Could not connect. " . mysqli_connect_error()); }
+        if($sql_connection === false){ die("ERROR: Could not connect. " . mysqli_connect_error()); }
 
         for ($i = 1; $i < $pagescount; $i++) {
 
@@ -446,15 +444,16 @@ class Web {
                 $priceNice = preg_replace("/[(),$]/", "", $price->plaintext);
                 $website = "custommhs";
                 $url = " ";
-                $this->sqlQuery($sku, $priceNice, $website, $url, $sqlconnection);
+
+                $this->sqlQuery($key, $priceNice, $website, $table_name, $sql_connection);
             }
         }
-        mysqli_close($sqlconnection);
+        mysqli_close($sql_connection);
 
     }
 
     //finished
-    function bizchair($url, $website, $pagescount, $sqlconnection){
+    function bizchair($url, $website, $pagescount, $sql_connection, $table_name){
         set_time_limit(0);
 
         $html = new simple_html_dom();
@@ -488,17 +487,18 @@ class Web {
 
                     echo $key;
                     echo $myprice;
-                    echo "<br />";
+
+                    $this->sqlQuery($key, $myprice, $website, $table_name, $sql_connection);
                 }
             }
             $itemOffset += 24;
         }
-        mysqli_close($sqlconnection);
+        mysqli_close($sql_connection);
 
     }
 
     //URL passed should be in the form of http://www.sodyinc.com/little-giant?sort=20a&page=1
-    function sodyinc($url, $website, $page_count, $sql_connection){
+    function sodyinc($url, $website, $page_count, $sql_connection, $table_name){
         //ensures no timing out - php has a 30 second timeout otherwise
         set_time_limit(0);
 
@@ -550,8 +550,7 @@ class Web {
                 $combined_array = array_combine($my_sku, $my_price);
 
                 foreach ($combined_array as $sku_number => $price_number) {
-                    $this->sqlQuery($sku_number, $price_number, $website, $url, $sql_connection);
-                }
+                    $this->sqlQuery($sku_number, $price_number, $website, $table_name, $sql_connection);                }
             }
         }
         mysqli_close($sql_connection);
@@ -579,17 +578,13 @@ class Web {
          //if there are any results returned, update
          if(mysqli_num_rows($result) > 0){
              mysqli_query($sql_connection, "UPDATE '" . $table_name ."' SET price = $price WHERE website = '$website' AND sku = '$sku' " );
-             echo "updated price <br />";
          }
          //else create a BRAND NEW PRODUCT WOW!
           else {
              mysqli_query($sql_connection, "INSERT INTO '" . $table_name ."'(sku, price, website, url) VALUES ('$sku', '$price', '$website', '$time_stamp') ");
-             echo "created price <br />";
          }
      }
 
 }
-
-
 
   ?>

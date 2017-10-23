@@ -1,8 +1,8 @@
 <?php
 
-    $conn = mysqli_connect('', '', '', '');
+    $conn = mysqli_connect('66.112.76.254', 'root', 'adamserver5', 'sams_test_database');
 
-    $sql = "SELECT * FROM little_giant_products ORDER BY website";
+    $sql = "SELECT * FROM vestil_products ORDER BY website";
 
     $result = mysqli_query($conn, $sql);
 
