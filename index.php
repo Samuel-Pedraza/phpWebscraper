@@ -36,7 +36,7 @@ $app->get('/', function ($request, $response, $args) {
 
 $app->post('/vestil', function($request, $response, $args){
     $vestilWebscrapers = new Web;
-    $sql = mysqli_connect('66.112.76.254', 'root', 'adamserver5', 'sams_test_database');
+    $sql = mysqli_connect('66..76.254', '', '', '');
 
     $vestilWebscrapers->hofequipment("http://hofequipment.com/cart.php?m=search_results&search=wp-4848", "hofequipment", "vestil_products", $sql);
     echo "hofequipment finished";
