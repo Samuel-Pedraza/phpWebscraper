@@ -55,19 +55,19 @@ Functions:
         hofequipment()
             //description
 
-        industrialsafety($url, $website, $page_count, $sql_connection, $table_name)
+        industrialsafety()
             //description
 
-        toolfetch($url, $website, $pagenumbers, $sql_connection, $table_name)
+        toolfetch()
             //description
 
-        opentip($url, $website, $pagescount, $sql_connection, $table_name)
+        opentip()
             //description
 
-        globalindustrial($url, $website, $pagenumbers, $sql_connection, $table_name)
+        globalindustrial()
             //description
 
-        source4industries($url, $website, $sql_connection, $table_name)
+        source4industries()
             //description
 
         spill911()
@@ -90,94 +90,59 @@ Functions:
 
 
 class Web {
-    //http://hofequipment.com/cart.php?m=search_results&catID=&venID=1&search=&shopByPrice=&sortBy=&viewAll=1
-    //$website
 
-    //need to delete timestamp or incorporate it into the databse
-    function hofequipment($url, $website, $sql_connection, $table_name) {
+    function hofequipment($url, $website, $table_name, $sql_connection) {
 
-         //necessary so that connection does not time out when webscraping
          set_time_limit(0);
 
-         //**need to rewrite**//
-         if(!$sql_connection) {
-             echo 'Failed to Connect';
-         }
-
-         //instantiates object of simple_html_dom(simplehtmldom.sourceforge.net)
          $html = new simple_html_dom();
-
          $html->load_file($url);
+         $product_url = $html->find(".grid__item div.btn-group a");
 
-         //$query is returned as an array
-         $query = $html->find(".grid__item div.btn-group a");
-
-         foreach ($query as $key) {
+         foreach ($product_url as $individual_url) {
 
              sleep(2);
 
-             //filters out the $key->href that contains the word 'javascript' --- we only want hrefs that are actual links --- otherwise this will return javascript functions
-             if(!(preg_match('/javascript/', $key->href))){
-                 //reinstantiates object of simple_html_dom(simplehtmldom.sourceforge.net)
+             if(!(preg_match('/javascript/', $individual_url->href))){
 
-                 //**need to rewrite**//
-                 $grabProducts = new simple_html_dom();
-
-                 $grabProducts->load_file($key->href);
-
-                 //**need to rewrite**//
-                 if($grabProducts->find("table.responsive_tables tbody tr") == True){
-                     foreach ($grabProducts->find("table.responsive_tables tbody tr") as $tr) {
+                 $grab_single_product = new simple_html_dom();
+                 $grab_single_product->load_file($individual_url->href);
 
 
-                         //productInfoArray holds two values
-                         //[0] holds the sku number for a given product
-                         //[1] hold the price for a given product
-                         $productInfoArray = [];
+                 if($grab_single_product->find("table.responsive_tables tbody tr") == True){
+                     foreach ($grab_single_product->find("table.responsive_tables tbody tr") as $tr) {
 
-                         foreach ($tr->find("td[data-title=SKU]") as $mySku) {
-                             array_push($productInfoArray, $mySku->innertext);
+                         $product_info_array = [];
+
+                         foreach ($tr->find("td[data-title=SKU]") as $raw_sku) {
+                             array_push($product_info_array, $raw_sku->innertext);
                          }
 
-                         foreach ($tr->find("td[data-title=Price]") as $myPrice) {
-                             //takes out extra formatting that is not needed nor wanted
-                             $editedPrice = preg_replace("/[(),$]/", "", $myPrice->innertext);
-                             array_push($productInfoArray, $editedPrice);
+                         foreach ($tr->find("td[data-title=Price]") as $raw_price) {
+                             array_push($product_info_array, preg_replace("/[(),$]/", "", $raw_price->innertext));
                          }
 
-                         //grabs first element in array
-                         $sku = current($productInfoArray);
+                         $sku = current($product_info_array);
+                         $price = next($product_info_array);
 
-                         //grabs second element in array
-                         $price     = next($productInfoArray);
-                         $timestamp = date("Y-m-d H:i:s");
-
-                         //**need to rewrite**//
                          if($sku && $price){
-                             //referes to sqlQuery -- cannot call sqlQuery(a,b,c,d);
                              $this->sqlQuery($sku, $price, $website, $table_name, $sql_connection);
                          }
                      }
-
                  } else {
 
-                     $productInfoArray = [];
+                     $product_info_array = [];
 
-                     foreach ($grabProducts->find("span[itemprop=sku]") as $mySku) {
-                         array_push($productInfoArray, $mySku->innertext);
+                     foreach ($grab_single_product->find("span[itemprop=sku]") as $raw_sku) {
+                         array_push($product_info_array, $raw_sku->innertext);
                      }
 
-                     foreach ($grabProducts->find("div.item-price--product") as $myPrice) {
-                         $editedPrice = preg_replace("/[(),$]/", "", $myPrice->innertext);
-                         array_push($productInfoArray, $editedPrice);
+                     foreach ($grab_single_product->find("div.item-price--product") as $my_price) {
+                         array_push($product_info_array, preg_replace("/[(),$]/", "", $my_price->innertext));
                      }
 
-                     //first element in array
-                     $sku = current($productInfoArray);
-
-                     //second element in array
-                     $price     = next($productInfoArray);
-                     $timestamp = date("Y-m-d H:i:s");
+                     $sku = current($product_info_array);
+                     $price = next($product_info_array);
 
                      if($sku && $price){
                          $this->sqlQuery($sku, $price, $website, $table_name, $sql_connection);
@@ -188,19 +153,17 @@ class Web {
          mysqli_close($sql_connection);
      }
 
-     //finished
-
 
     function industrialsafety($url, $website, $page_numbers, $sql_connection, $table_name){
         set_time_limit(0);
 
-        for($pages = 1; $pages <= $page_numbers; $pages++){
+        for($pages = 1; $pages <= 2; $pages++){
             $html = new simple_html_dom();
 
             #breaks url into an array
-            $myUrl = explode("1", $url);
+            $my_url = explode("1", $url);
 
-            $html->load_file($myUrl[0] . $pages . $myUrl[1]);
+            $html->load_file($my_url[0] . $pages . $my_url[1]);
 
             //so we dont get banned - gives the webscraper a nice chill pill
             sleep(3);
@@ -209,27 +172,19 @@ class Web {
 
             foreach ($query as $product) {
 
-                 $infoArray = [];
+                 $info_array = [];
 
                  foreach ($product->find(".product-item-link") as $my_sku) {
-
-                     $skuArray = explode(" ", trim($my_sku->plaintext));  //
-
-                     array_push($infoArray, $skuArray[1]); //[0] skuNum
-                     array_push($infoArray, $my_sku->href); //[1] href
-
+                     $sku_array = explode(" ", trim($my_sku->plaintext));
+                     array_push($info_array, $sku_array[1]);
                  }
 
-                 foreach($product->find(".price-wrapper .price") as $price){
-
-                     $mprice = preg_replace("/[(),$]/", "", $price->innertext);
-                     array_push($infoArray, $mprice); //[2] price
-
+                 foreach($product->find(".price-wrapper .price") as $my_price){
+                     array_push($info_array, preg_replace("/[(),$]/", "", $my_price->innertext)); //[2] price
                  }
 
-                 $sku       = $infoArray[0];
-                 $price     = $infoArray[2];
-                 $url       = $infoArray[1];
+                 $sku       = $info_array[0];
+                 $price     = $info_array[1];
 
                  $this->sqlQuery($sku, $price, $website, $table_name, $sql_connection);
             }
@@ -540,7 +495,6 @@ class Web {
     //finished
     //will need a sleep function when enabling a work around for prices with more than one item
 
-
     //perhaps grab santizing function and pass for other prices in this document???
     function bizchair($url, $website, $page_numbers, $sql_connection, $table_name){
         set_time_limit(0);
@@ -657,18 +611,17 @@ class Web {
 
     //THIS IS VERY UGLY. I APOLOGIZE.
     //$sql_connection is for mysqli_connection
-    //$tableName is for which table you want to select from
+    //$table_name is for which table you want to select from
     //other variables are exactly what they are declared to be
-    function sqlQuery($sku, $price, $website, $table_name, $sql_connection){
-         $result = mysqli_query($sql_connection, "SELECT * FROM " . $table_name . " WHERE model_number = '" . $sku . "' AND website = '" . $website . "' " );
+
+    function sqlQuery($model_number, $price, $website, $table_name, $sql_connection){
+         $result = mysqli_query($sql_connection, "SELECT * FROM '$table_name' WHERE model_number = '$model_number' AND website = '$website'");
 
          //if there are any results returned, update
          if(mysqli_num_rows($result) > 0){
-             mysqli_query($sql_connection, "UPDATE '" . $table_name ."' SET price = $price WHERE website = '$website' AND model_number = '$sku' " );
-         }
-         //else create a BRAND NEW PRODUCT WOW!
-          else {
-             mysqli_query($sql_connection, "INSERT INTO '" . $table_name ."'(model_number, price, website) VALUES ('$sku', '$price', '$website') ");
+             mysqli_query($sql_connection, "UPDATE '$table_name' SET price = $price WHERE website = '$website' AND model_number = '$model_number' " );
+         } else {
+            mysqli_query($sql_connection, "INSERT INTO '$table_name'(model_number, price, website) VALUES ('$model_number', '$price', '$website') ");
          }
      }
 
