@@ -21,7 +21,6 @@ $conn = mysqli_connect("$db_host", "$db_username", "$db_pass", "$db_name");
 				echo $target;
 			}
 		}
-
 	}
 mysqli_close($conn);
 ?>
