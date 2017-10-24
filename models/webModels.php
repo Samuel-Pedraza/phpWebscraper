@@ -333,45 +333,42 @@ class Web {
         //necessary so that connection does not time out when webscraping
         set_time_limit(0);
 
-        if($sql_connection === false){ die("ERROR: Could not connect. " . mysqli_connect_error()); }
-
-        $html = new simple_html_dom();
-
+        $my_url = explode("searchoffset=0", $url);
         #https://www.spill911.com/mm5/merchant.mvc?Screen=SRCH2&Store_Code=spill911&search=vestil&searchoffset=0&Category_Code=&filter_cat=&PowerSearch_Begin_Only=&sort=&range_low=&range_high=&customfield1=brand&filter_cf1=&customfield2=&filter_cf2=&customfield3=&filter_cf3=&psboost=srchkeys%2Ccode%2Cname&filter_price=&priceranges=1
+        $increaseby32 = 0;
 
-        for ($i=1; $i < 2 ; $i++) {
-            $html->load_file($url);
+        for ($i=1; $i < 8; $i++) {
 
+            $html = new simple_html_dom();
+            $html->load_file($my_url[0] . "searchoffset=" . $increaseby32 . $my_url[1]);
             $links = $html->find(".ctgy-layout-info strong a");
 
-            foreach ($links as $key => $value) {
+            foreach ($links as $key => $link) {
 
-                $new_page = new simple_html_dom();
-                $new_page->load_file($value->href);
+                $individual_webpage = new simple_html_dom();
+                $individual_webpage->load_file($link->href);
+                $raw_sku = $individual_webpage->find(".product-manufacturer-part");
+                $raw_price = $individual_webpage->find(".price-value");
 
-                $my_price = $new_page->find("h3.prod-price .price-value");
+                $sku_array = array();
+                $price_array = array();
 
-                $my_sku = $new_page->find(".product-manufacturer-part");
+                foreach ($raw_sku as $info => $single_sku) {
 
-                $myPriceArray = array();
-                $mySkuArray   = array();
-
-                foreach ($my_sku as $key1 => $value1) {
-                    $editedSku = preg_replace("/Manufacturer Part Number:/", "", $value1->plaintext);
-                    array_push($mySkuArray, $editedSku);
+                    array_push($sku_array, preg_replace("/Manufacturer Part Number:/", "", strip_tags($single_sku->innertext)));
+                }
+                foreach ($raw_price as $index => $single_price) {
+                    array_push($price_array, preg_replace("/[(),$]/", "", $single_price->innertext));
                 }
 
-                foreach ($my_price as $key2 => $value2) {
-                    $priceNice = preg_replace("/[(),$]/", "", $value2->innertext);
-                    array_push($myPriceArray, $priceNice);
-                }
+                $combined = array_combine($sku_array, $price_array);
 
-                $myArray = array_combine($mySkuArray, $myPriceArray);
-
-                foreach ($myArray as $sku => $price) {
+                foreach ($combined as $sku => $price) {
                     $this->sqlQuery($sku, $price, $website, $sql_connection);
                 }
-            }
+            };
+
+            $increaseby32 += 32;
         }
     }
 
