@@ -166,7 +166,6 @@ class Web {
     //https://stackoverflow.com/questions/12164196/warning-file-get-contents-failed-to-open-stream-redirection-limit-reached-ab
     //notes to help understand until i can come in and comment this baby up
 
-    //rewrite toolfetch
     function toolfetch($url, $website, $page_numbers, $sql_connection){
         set_time_limit(0);
 
@@ -241,7 +240,8 @@ class Web {
             $myUrl = explode("cp=1", $url);
 
             $html = new simple_html_dom();
-            $html->load_file($myUrl[0] . "cp=1" . $i);
+
+            $html->load_file($myUrl[0] . "cp=" . $i);
 
 
             $document_links = $html->find(".grid .prod .title a");
@@ -267,7 +267,7 @@ class Web {
                 }
 
                 foreach ($price as $index => $myprice) {
-                    array_push($myArray, $myprice->plaintext);
+                    array_push($myArray, preg_replace("/[(),$]/", "", $myprice->plaintext));
                 }
 
                 //grabs first element in array
@@ -277,9 +277,13 @@ class Web {
                 $price = next($myArray);
 
                 $url = "http://www.globalindustrial.com/" . $value->href;
+
+                echo $sku . " " . $price . " " . $website;
+
                 $this->sqlQuery($sku, $price, $website, $sql_connection);
             }
         }
+
         mysqli_close($sql_connection);
     }
 
@@ -333,19 +337,16 @@ class Web {
 
         $html = new simple_html_dom();
 
-        $increaseOffsetBy32 = 0;
+        #https://www.spill911.com/mm5/merchant.mvc?Screen=SRCH2&Store_Code=spill911&search=vestil&searchoffset=0&Category_Code=&filter_cat=&PowerSearch_Begin_Only=&sort=&range_low=&range_high=&customfield1=brand&filter_cf1=&customfield2=&filter_cf2=&customfield3=&filter_cf3=&psboost=srchkeys%2Ccode%2Cname&filter_price=&priceranges=1
 
-        $myUrl = explode("searchoffset", $url);
-
-        for ($i=1; $i <= 47 ; $i++) {
-            $html->load_file($myUrl[0] . "searchoffset" . $increaseOffsetBy32 . $myUrl[1]);
+        for ($i=1; $i < 2 ; $i++) {
+            $html->load_file($url);
 
             $links = $html->find(".ctgy-layout-info strong a");
 
             foreach ($links as $key => $value) {
 
                 $new_page = new simple_html_dom();
-                sleep(2);
                 $new_page->load_file($value->href);
 
                 $my_price = $new_page->find("h3.prod-price .price-value");
@@ -368,17 +369,10 @@ class Web {
                 $myArray = array_combine($mySkuArray, $myPriceArray);
 
                 foreach ($myArray as $sku => $price) {
-
-                    echo $sku . " " . $price . " " . $website .  " " . $url;
-
                     $this->sqlQuery($sku, $price, $website, $sql_connection);
                 }
             }
-
-            $increaseOffsetBy32 += 32;
         }
-
-        mysqli_close($sql_connection);
     }
 
     //no pages_count because this can be loaded and rendered on one page

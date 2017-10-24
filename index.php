@@ -36,27 +36,26 @@ $app->post('/vestil', function($request, $response, $args){
 
     // $vestilWebscrapers->hofequipment("http://hofequipment.com/cart.php?m=search_results&catID=&venID=1&search=&shopByPrice=&sortBy=&viewAll=1", "hofequipment", $sql);
     // echo "hofequipment finished";
-
+    //
     // $vestilWebscrapers->industrialsafety("https://industrialsafety.com/catalogsearch/result/index/?p=1&product_list_limit=80&q=vestil", "industrialsafety", 14, $sql);
     // echo "industrialsafety finished";
     //
-    //fix
-    $vestilWebscrapers->toolfetch("https://www.toolfetch.com/by-brand/vestil/l/brand:vestil.html?limit=48&p=1", "toolfetch", 172, $sql);
-    echo "toolfetch finished";
-    //
+    // $vestilWebscrapers->toolfetch("https://www.toolfetch.com/by-brand/vestil/l/brand:vestil.html?limit=48&p=1", "toolfetch", 172, $sql);
+    // echo "toolfetch finished";
+    // //
     // $vestilWebscrapers->opentip("https://www.opentip.com/search.php?brand=35098&keywords=vestil&page=1", "opentip", 305, $sql);
     // echo "opentip finished";
     //
-    //fix
+    // //fix
     // $vestilWebscrapers->globalindustrial("http://www.globalindustrial.com/shopByBrandName/V/vestil-manufacturing?cp=1&ps=72", "globalindustrial", 34, $sql);
     // echo "globalindustrial finished";
     //
-    //fix
+    // //fix
     // $vestilWebscrapers->source4industries("https://source4industries.com/index.php?route=product/search&search=vestil", "source4industries", $sql);
     // echo "source4industries finished";
     //??????????
-    //$vestilWebscrapers->spill911("https://www.spill911.com/mm5/merchant.mvc?Screen=SRCH2&Store_Code=spill911&search=vestil&searchoffset=0&Category_Code=&filter_cat=&PowerSearch_Begin_Only=&sort=&range_low=&range_high=&customfield1=brand&filter_cf1=&customfield2=&filter_cf2=&customfield3=&filter_cf3=&psboost=srchkeys%2Ccode%2Cname&filter_price=&priceranges=1", "spill911", $sql);
-    //echo "spill911 finished";
+    $vestilWebscrapers->spill911("https://www.spill911.com/mm5/merchant.mvc?Screen=SRCH2&Store_Code=spill911&search=vestil&searchoffset=0&Category_Code=&filter_cat=&PowerSearch_Begin_Only=&sort=&range_low=&range_high=&customfield1=brand&filter_cf1=&customfield2=&filter_cf2=&customfield3=&filter_cf3=&psboost=srchkeys%2Ccode%2Cname&filter_price=&priceranges=1", "spill911", $sql);
+    echo "spill911 finished";
     //
     // $vestilWebscrapers->custommhs("https://www.custommhs.com/index.php?route=product/manufacturer&manufacturer_id=42", "custommhs", $sql);
     // echo "custommhs finished";
