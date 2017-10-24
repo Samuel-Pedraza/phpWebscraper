@@ -1,6 +1,6 @@
 <?php
 
-    $conn = mysqli_connect('66.112.76.254', '', '', '');
+    $conn = mysqli_connect('66.112.76.254', 'root', 'adamserver5', '');
 
     $sql = "SELECT * FROM vestil_products ORDER BY website";
 
@@ -12,11 +12,11 @@
         # code...
         echo "<tr>";
         foreach ($value as $key2 => $value2) {
-            # code...
 
             if ($key2 == "website") {
                 echo "<td>" . $value2 . "</td>";
             }
+
             elseif($key2 == "id" ){
                 echo "<td>
                 <form action=/edit/" . $value2 . " method=GET>
@@ -24,6 +24,7 @@
                 </form>
                 </td>";
             }
+
             else {
                 echo "<td>" . $value2 . "</td>";
             }

@@ -15,13 +15,12 @@ $container = $app->getContainer();
 $container['renderer'] = new PhpRenderer("./templates");
 
 
-
-
 //--------------------------//
 //                          //
 //         ROUTES           //
 //                          //
 //--------------------------//
+
 //Resource to help:
 //https://www.slimframework.com/docs/objects/router.html
 
@@ -32,19 +31,19 @@ $app->get('/', function ($request, $response, $args) {
 
 $app->post('/vestil', function($request, $response, $args){
     $vestilWebscrapers = new Web;
-    $sql = mysqli_connect('66..76.254', '', '', '');
+    $sql = mysqli_connect('66.112.76.254', 'root', 'adamserver5', 'sams_test_database');
 
-    $vestilWebscrapers->hofequipment("http://hofequipment.com/cart.php?m=search_results&search=wp-4848", "hofequipment", "vestil_products", $sql);
-    echo "hofequipment finished";
+    // $vestilWebscrapers->hofequipment("http://hofequipment.com/cart.php?m=search_results&catID=&venID=1&search=&shopByPrice=&sortBy=&viewAll=1", "hofequipment", "vestil_products", $sql);
+    // echo "hofequipment finished";
 
-    $vestilWebscrapers->industrialsafety("https://industrialsafety.com/catalogsearch/result/index/?p=1&product_list_limit=80&q=vestil", "industrialsafety", 14, $sql, "vestil_products");
-    echo "industrialsafety finished";
+    // $vestilWebscrapers->industrialsafety("https://industrialsafety.com/catalogsearch/result/index/?p=1&product_list_limit=80&q=vestil", "industrialsafety", 14, $sql, "vestil_products");
+    // echo "industrialsafety finished";
 
-    $vestilWebscrapers->toolfetch("https://www.toolfetch.com/by-brand/vestil/l/brand:vestil.html?limit=48&p=1", "toolfetch", 172, $sql, "vestil_products");
-    echo "toolfetch finished";
-
-    $vestilWebscrapers->opentip("https://www.opentip.com/search.php?brand=35098&keywords=vestil&page=1", "opentip", 305, $sql, "vestil_products");
-    echo "opentip finished";
+    // $vestilWebscrapers->toolfetch("https://www.toolfetch.com/by-brand/vestil/l/brand:vestil.html?limit=48&p=1", "toolfetch", 172, $sql, "vestil_products");
+    // echo "toolfetch finished";
+    //
+    // $vestilWebscrapers->opentip("https://www.opentip.com/search.php?brand=35098&keywords=vestil&page=1", "opentip", 305, $sql, "vestil_products");
+    // echo "opentip finished";
 
     $vestilWebscrapers->globalindustrial("http://www.globalindustrial.com/shopByBrandName/V/vestil-manufacturing?cp=1&ps=72", "globalindustrial", 34, $sql, "vestil_products");
     echo "globalindustrial finished";

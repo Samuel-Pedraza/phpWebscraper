@@ -180,11 +180,11 @@ class Web {
                  }
 
                  foreach($product->find(".price-wrapper .price") as $my_price){
-                     array_push($info_array, preg_replace("/[(),$]/", "", $my_price->innertext)); //[2] price
+                     array_push($info_array, preg_replace("/[(),$]/", "", $my_price->innertext));
                  }
 
-                 $sku       = $info_array[0];
-                 $price     = $info_array[1];
+                 $sku   = $info_array[0];
+                 $price = $info_array[1];
 
                  $this->sqlQuery($sku, $price, $website, $table_name, $sql_connection);
             }
@@ -257,8 +257,8 @@ class Web {
                 $table_name = "vestil_products";
                 $this->sqlQuery($sku, $price, $website, $table_name, $sql_connection);
             }
-            mysqli_close($sql_connection);
         }
+        mysqli_close($sql_connection);
     }
 
     // finished
@@ -526,6 +526,7 @@ class Web {
             }
             $itemOffset += 24;
         }
+
         mysqli_close($sql_connection);
 
     }
