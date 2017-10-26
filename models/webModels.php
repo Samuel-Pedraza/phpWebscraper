@@ -56,14 +56,8 @@ Functions:
 
     Order:
 
-        hofequipment:
-            INPUT:
-                * $url
-                * $website
-                * $sql_connection
 
-            NOTES:
-                set_time_limit(0)
+        hofequipment:
 
         industrialsafety
 
@@ -82,7 +76,6 @@ Functions:
         sodyinc
 
         sustainablesupply
-
 
         sqlQuery
 
@@ -208,7 +201,7 @@ class Web {
     function toolfetch($url, $website, $page_numbers, $sql_connection){
         set_time_limit(0);
 
-        for($j = 1; $j <= $page_numbers; $j++){
+        for($j = 65; $j < 67; $j++){
 
             $myUrl = explode("1", $url);
 
@@ -216,17 +209,19 @@ class Web {
             $html->load_file($myUrl[0] . $j);
 
             $sku_raw = $html->find(".col-main .sku span");
-            $price_raw = $html->find(".col-main span.price");
+            $price_raw = $html->find(".col-main .item .descript div.price-box span.price");
 
             $sku_array = array();
             $price_array = array();
 
             foreach ($sku_raw as $key => $value) {
                 array_push($sku_array, preg_replace("/VES-/", "", $value->innertext));
+                echo $value->innertext . "\n";
             }
 
             foreach ($price_raw as $id => $my_price) {
                 array_push($price_array, preg_replace("/[(),$]/", "", $my_price->innertext));
+                echo $my_price->innertext . "\n";
             }
 
             $combined = array_combine($sku_array, $price_array);
@@ -584,6 +579,7 @@ class Web {
             echo "created <br />";
          }
      }
+
 
 }
 

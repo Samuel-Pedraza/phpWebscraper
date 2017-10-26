@@ -34,17 +34,19 @@ $app->get('/', function ($request, $response, $args) {
 
 $app->post('/vestil', function($request, $response, $args){
     $vestilWebscrapers = new Web;
+    //FIX
+    //Warning: mysqli_query() expects parameter 1 to be mysqli, null given in
+    //https://stackoverflow.com/questions/18933107/warning-mysqli-query-expects-parameter-1-to-be-mysqli-null-given
+    $sql = mysqli_connect('66.112.76.254', '', '', 'sams_test_database');
 
-    $sql = mysqli_connect('66.112.76.254', 'root', 'adamserver5', 'sams_test_database');
-
-    $vestilWebscrapers->hofequipment("http://hofequipment.com/cart.php?m=search_results&catID=&venID=1&search=&shopByPrice=&sortBy=&viewAll=1", "hofequipment", $sql);
-    echo "hofequipment finished";
+    // $vestilWebscrapers->hofequipment("http://hofequipment.com/cart.php?m=search_results&catID=&venID=1&search=&shopByPrice=&sortBy=&viewAll=1", "hofequipment", $sql);
+    // echo "hofequipment finished";
 
     // $vestilWebscrapers->industrialsafety("https://industrialsafety.com/catalogsearch/result/index/?p=1&product_list_limit=80&q=vestil", "industrialsafety", 14, $sql);
     // echo "industrialsafety finished";
     //
-    // $vestilWebscrapers->toolfetch("https://www.toolfetch.com/by-brand/vestil/l/brand:vestil.html?limit=48&p=1", "toolfetch", 172, $sql);
-    // echo "toolfetch finished";
+    $vestilWebscrapers->toolfetch("https://www.toolfetch.com/by-brand/vestil/l/brand:vestil.html?limit=48&p=1", "toolfetch", 172, $sql);
+    echo "toolfetch finished";
     //
     // $vestilWebscrapers->opentip("https://www.opentip.com/search.php?brand=35098&keywords=vestil&page=1", "opentip", 305, $sql);
     // echo "opentip finished";
