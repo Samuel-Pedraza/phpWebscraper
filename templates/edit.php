@@ -12,8 +12,8 @@ foreach ($result as $key => $value) {
         echo "<input name = " . $key1 . " value = " . $value1 . "> <br />";
     }
 }
-echo "<br />";
 
+echo "<br />";
 echo "<input type='submit' />";
 echo "</form>";
 
@@ -21,11 +21,11 @@ echo "<a href='/vestil'>Back</a>";
 
 if (isset($_GET["price"])){
 
-    $price = $_GET["price"];
-    $id = $_GET["id"];
-    $website = $_GET["website"];
-    $url = $_GET["url"];
-    $sku = $_GET["sku"];
+    $price   =  $_GET["price"];
+    $id      =  $_GET["id"];
+    $website =  $_GET["website"];
+    $url     =  $_GET["url"];
+    $sku     =  $_GET["sku"];
 
     $sql = "UPDATE test_data SET price = $price WHERE id = '$id'";
 

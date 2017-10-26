@@ -47,6 +47,46 @@ Variables:
             $website:
                 what website we are webscraping, this is inserted into the database and is also an input variable
 
+Functions:
+
+    Structure:
+
+
+
+
+    Order:
+
+        hofequipment:
+            INPUT:
+                * $url
+                * $website
+                * $sql_connection
+
+            NOTES:
+                set_time_limit(0)
+
+        industrialsafety
+
+        toolfetch
+
+        opentip
+
+        globalindustrial
+
+        spill911
+
+        custommhs
+
+        bizchair
+
+        sodyinc
+
+        sustainablesupply
+
+
+        sqlQuery
+
+
 Functions that can abstracted out:
 
     sanitizing function
@@ -124,7 +164,6 @@ class Web {
          mysqli_close($sql_connection);
      }
 
-
     function industrialsafety($url, $website, $page_numbers, $sql_connection){
         set_time_limit(0);
 
@@ -196,6 +235,7 @@ class Web {
                 $this->sqlQuery($sku, $price, $website, $sql_connection);
             }
         }
+        mysqli_close($sql_connection);
     }
 
     function opentip($url, $website, $page_numbers, $sql_connection){
@@ -370,6 +410,7 @@ class Web {
 
             $increaseby32 += 32;
         }
+        mysqli_close($sql_connection);
     }
 
     //no pages_count because this can be loaded and rendered on one page
@@ -408,7 +449,6 @@ class Web {
             }
 
         mysqli_close($sql_connection);
-
     }
 
     //will need a sleep function when enabling a work around for prices with more than one item
@@ -451,7 +491,6 @@ class Web {
             $itemOffset += 24;
         }
         mysqli_close($sql_connection);
-
     }
 
     //URL passed should be in the form of http://www.sodyinc.com/little-giant?sort=20a&page=1
