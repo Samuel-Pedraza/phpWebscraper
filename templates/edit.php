@@ -1,4 +1,5 @@
 <?php
+
 $conn = mysqli_connect('', '', '', '');
 
 $sql = "SELECT * FROM little_giant_products WHERE id = " . $id;

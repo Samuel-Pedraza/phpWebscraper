@@ -2,11 +2,11 @@
 
 set_time_limit(0);
 
-$conn = mysqli_connect('', '', '', '');
+include('db_connect.php');
 
 $sql = "SELECT sku FROM little_giant_products order by little_giant_products.sku ";
 
-$result = mysqli_query($conn, $sql);
+$result = mysqli_query($connect, $sql);
 
 
 echo "<table><tr>
