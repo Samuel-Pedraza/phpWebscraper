@@ -201,44 +201,44 @@ class Web {
     function toolfetch($url, $website, $page_numbers, $sql_connection){
         set_time_limit(0);
 
-        for($j = 65; $j < 67; $j++){
+        for($page_count = 1; $page_count < $page_numbers; $page_count++){
 
             $myUrl = explode("1", $url);
 
             $html = new simple_html_dom();
-            $html->load_file($myUrl[0] . $j);
+            $html->load_file($myUrl[0] . $page_count);
 
             $links = $html->find(".products-grid li.item span.product-name a");
-            
+
             foreach($links as $a){
-                
+
                 $new_page = new simple_html_dom();
-                $new_page->load_file( $a->href);
-            
+                $new_page->load_file($a->href);
+
                 $price_raw = $new_page->find(".productPrice .price-box span.price");
                 $sku_raw = $new_page->find(".product-view .product-shop .product-ids");
-    
+
                 $sku_array = array();
                 $price_array = array();
-    
+
                 foreach ($sku_raw as $key => $value) {
-                    array_push($sku_array, preg_replace("/VES-/", "", $value->innertext));
+                    array_push($sku_array, preg_replace("/Part# VES-/", "", $value->innertext));
                     echo $value->innertext . "\n";
                 }
-    
+
                 foreach ($price_raw as $id => $my_price) {
                     array_push($price_array, preg_replace("/[(),$]/", "", $my_price->innertext));
                     echo $my_price->innertext . "\n";
                 }
-    
+
                 $combined = array_combine($sku_array, $price_array);
-    
+
                 foreach ($combined as $sku => $price) {
-                    echo $sku . " " . $price . "<br>";
+                    $this->sqlQuery($sku, $price, $website, $sql_connection);
                 }
             }
         }
-        //mysqli_close($sql_connection);
+        mysqli_close($sql_connection);
     }
 
     function opentip($url, $website, $page_numbers, $sql_connection){
@@ -271,6 +271,7 @@ class Web {
                 $this->sqlQuery($sku, $price, $website, $sql_connection);
             }
         }
+
         mysqli_close($sql_connection);
     }
 
@@ -425,7 +426,7 @@ class Web {
 
         $html = new simple_html_dom();
 
-        if($sql_connection === false){ die("ERROR: Could not connect. " . mysqli_connect_error()); }
+            if($sql_connection === false){ die("ERROR: Could not connect. " . mysqli_connect_error()); }
 
             $html->load_file($url);
 

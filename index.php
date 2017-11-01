@@ -34,46 +34,41 @@ $app->get('/', function ($request, $response, $args) {
 
 $app->post('/', function($request, $response, $args){
     $vestilWebscrapers = new Web;
-    
+
     //FIX
     //Warning: mysqli_query() expects parameter 1 to be mysqli, null given in
     //https://stackoverflow.com/questions/18933107/warning-mysqli-query-expects-parameter-1-to-be-mysqli-null-given
-    
-    $servername = '127.0.0.1';
-    $username = "spedraza";
-    $password = "";
-    $database = "c9";
-    $dbport = 3306;
+
 
     // Create connection
-    $sql = new mysqli($servername, $username, $password, $database, $dbport);
+    $sql = mysqli_connect('66.112.76.254', '', '', 'sams_test_database');
 
-    // $vestilWebscrapers->hofequipment("http://hofequipment.com/cart.php?m=search_results&catID=&venID=1&search=&shopByPrice=&sortBy=&viewAll=1", "hofequipment", $sql);
-    // echo "hofequipment finished";
+    $vestilWebscrapers->hofequipment("http://hofequipment.com/cart.php?m=search_results&catID=&venID=1&search=&shopByPrice=&sortBy=&viewAll=1", "hofequipment", mysqli_connect('66.112.76.254', '', '', 'sams_test_database'));
+    echo "hofequipment finished";
 
-    // $vestilWebscrapers->industrialsafety("https://industrialsafety.com/catalogsearch/result/index/?p=1&product_list_limit=80&q=vestil", "industrialsafety", 14, $sql);
-    // echo "industrialsafety finished";
-    //
-    $vestilWebscrapers->toolfetch("https://www.toolfetch.com/by-brand/vestil/l/brand:vestil.html?limit=48&p=1", "toolfetch", 172, $sql);
+    $vestilWebscrapers->industrialsafety("https://industrialsafety.com/catalogsearch/result/index/?p=1&product_list_limit=80&q=vestil", "industrialsafety", 14, mysqli_connect('66.112.76.254', '', '', 'sams_test_database'));
+    echo "industrialsafety finished";
+
+    $vestilWebscrapers->toolfetch("https://www.toolfetch.com/by-brand/vestil/l/brand:vestil.html?limit=48&p=1", "toolfetch", 172, mysqli_connect('66.112.76.254', '', '', 'sams_test_database'));
     echo "toolfetch finished";
-    //
-    // $vestilWebscrapers->opentip("https://www.opentip.com/search.php?brand=35098&keywords=vestil&page=1", "opentip", 305, $sql);
-    // echo "opentip finished";
-    //
-    // $vestilWebscrapers->globalindustrial("http://www.globalindustrial.com/shopByBrandName/V/vestil-manufacturing?cp=1&ps=72", "globalindustrial", 34, $sql);
-    // echo "globalindustrial finished";
-    //
-    // $vestilWebscrapers->source4industries("https://source4industries.com/index.php?route=product/search&search=vestil", "source4industries", $sql);
-    // echo "source4industries finished";
-    //
-    // $vestilWebscrapers->spill911("https://www.spill911.com/mm5/merchant.mvc?Screen=SRCH2&Store_Code=spill911&search=vestil&searchoffset=0&Category_Code=&filter_cat=&PowerSearch_Begin_Only=&sort=&range_low=&range_high=&customfield1=brand&filter_cf1=&customfield2=&filter_cf2=&customfield3=&filter_cf3=&psboost=srchkeys%2Ccode%2Cname&filter_price=&priceranges=1", "spill911", $sql);
-    // echo "spill911 finished";
-    //
-    // $vestilWebscrapers->custommhs("https://www.custommhs.com/index.php?route=product/manufacturer&manufacturer_id=42", "custommhs", $sql);
-    // echo "custommhs finished";
-    //
-    // $vestilWebscrapers->sodyinc("http://www.sodyinc.com/index.php?main_page=index&manufacturers_id=2&sort=20a&page=1", "sodyinc", 13, $sql);
-    // echo "sodyinc finished";
+
+    $vestilWebscrapers->opentip("https://www.opentip.com/search.php?brand=35098&keywords=vestil&page=1", "opentip", 305, mysqli_connect('66.112.76.254', '', '', 'sams_test_database'));
+    echo "opentip finished";
+
+    $vestilWebscrapers->globalindustrial("http://www.globalindustrial.com/shopByBrandName/V/vestil-manufacturing?cp=1&ps=72", "globalindustrial", 34, mysqli_connect('66.112.76.254', '', '', 'sams_test_database'));
+    echo "globalindustrial finished";
+
+    $vestilWebscrapers->source4industries("https://source4industries.com/index.php?route=product/search&search=vestil", "source4industries", mysqli_connect('66.112.76.254', '', '', 'sams_test_database'));
+    echo "source4industries finished";
+
+    $vestilWebscrapers->spill911("https://www.spill911.com/mm5/merchant.mvc?Screen=SRCH2&Store_Code=spill911&search=vestil&searchoffset=0&Category_Code=&filter_cat=&PowerSearch_Begin_Only=&sort=&range_low=&range_high=&customfield1=brand&filter_cf1=&customfield2=&filter_cf2=&customfield3=&filter_cf3=&psboost=srchkeys%2Ccode%2Cname&filter_price=&priceranges=1", "spill911", mysqli_connect('66.112.76.254', '', '', 'sams_test_database'));
+    echo "spill911 finished";
+
+    $vestilWebscrapers->custommhs("https://www.custommhs.com/index.php?route=product/manufacturer&manufacturer_id=42", "custommhs", mysqli_connect('66.112.76.254', '', '', 'sams_test_database'));
+    echo "custommhs finished";
+
+    $vestilWebscrapers->sodyinc("http://www.sodyinc.com/index.php?main_page=index&manufacturers_id=2&sort=20a&page=1", "sodyinc", 13, mysqli_connect('66.112.76.254', '', '', 'sams_test_database'));
+    echo "sodyinc finished";
 });
 
 $app->post('/littlegiant', function($request, $response, $args){
@@ -95,7 +90,7 @@ $app->get('/lowest', function($request, $response, $args){
 //to update form
 $app->put('/edit/{id}', function ($request, $response, $args) {
     // Update book identified by $args['id']
-    $conn = mysqli_connect('', '', '', '');
+    $conn = mysqli_connect('66.112.76.254', '', '', 'sams_test_database');
 
     $sql = "UPDATE test_data SET price = $price WHERE id = '$id'";
 
@@ -106,5 +101,3 @@ $app->put('/edit/{id}', function ($request, $response, $args) {
 });
 
 $app->run();
-
-
