@@ -25,7 +25,7 @@ echo "<table>
 
 $sql = "SELECT model_number FROM vestil_products order by vestil_products.model_number";
 
-$connect = mysqli_connect('66.112.76.254', '', '', 'sams_test_database');
+$connect = mysqli_connect('66.112.76.254', 'root', 'adamserver5', 'sams_test_database');
 
 $result = mysqli_query($connect, $sql);
 

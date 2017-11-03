@@ -30,7 +30,7 @@ Variables:
                 declares ip, username, password and database using mysqli_connection()
 
             $table_name:
-                passed to sqlQuery(), so we know what table name to insert or update records
+                passed to price_creation_update(), so we know what table name to insert or update records
 
             $page_numbers (not required for every webscraper):
                 tells us how many pages we must make a request to.
@@ -77,7 +77,7 @@ Functions:
 
         sustainablesupply
 
-        sqlQuery
+        price_creation_update
 
 
 Functions that can abstracted out:
@@ -85,17 +85,13 @@ Functions that can abstracted out:
     sanitizing function
 
     instantiate url and grab page, invoke wait (optional parameter -> return array of elements)
-
-
-
-
 */
 
 
 
 class Web {
 
-    function hofequipment($url, $website, $sql_connection) {
+    function hofequipment($url, $website, $manufacturer, $sql_connection) {
 
          set_time_limit(0);
 
@@ -130,7 +126,7 @@ class Web {
                          $price = next($product_info_array);
 
                          if($sku && $price){
-                             $this->sqlQuery($sku, $price, $website, $sql_connection);
+                             $this->price_creation_update($sku, $price, $website, $manufacturer, $sql_connection);
                          }
                      }
                  } else {
@@ -149,7 +145,7 @@ class Web {
                      $price = next($product_info_array);
 
                      if($sku && $price){
-                         $this->sqlQuery($sku, $price, $website, $sql_connection);
+                         $this->price_creation_update($sku, $price, $website, $manufacturer, $sql_connection);
                      }
                  }
              }
@@ -157,7 +153,7 @@ class Web {
          mysqli_close($sql_connection);
      }
 
-    function industrialsafety($url, $website, $page_numbers, $sql_connection){
+    function industrialsafety($url, $website, $page_numbers, $manufacturer, $sql_connection){
         set_time_limit(0);
 
         for($pages = 1; $pages <= $page_numbers; $pages++){
@@ -189,7 +185,7 @@ class Web {
                  $sku       = $info_array[0];
                  $price     = $info_array[1];
 
-                 $this->sqlQuery($sku, $price, $website, $sql_connection);
+                 $this->price_creation_update($sku, $price, $website, $manufacturer, $sql_connection);
             }
         }
 
@@ -198,7 +194,7 @@ class Web {
     //https://stackoverflow.com/questions/12164196/warning-file-get-contents-failed-to-open-stream-redirection-limit-reached-ab
     //notes to help understand until i can come in and comment this baby up
 
-    function toolfetch($url, $website, $page_numbers, $sql_connection){
+    function toolfetch($url, $website, $page_numbers,  $manufacturer, $sql_connection){
         set_time_limit(0);
 
         for($page_count = 1; $page_count < $page_numbers; $page_count++){
@@ -234,14 +230,14 @@ class Web {
                 $combined = array_combine($sku_array, $price_array);
 
                 foreach ($combined as $sku => $price) {
-                    $this->sqlQuery($sku, $price, $website, $sql_connection);
+                    $this->price_creation_update($sku, $price, $website, $manufacturer, $sql_connection);
                 }
             }
         }
         mysqli_close($sql_connection);
     }
 
-    function opentip($url, $website, $page_numbers, $sql_connection){
+    function opentip($url, $website, $page_numbers, $manufacturer, $sql_connection){
 
        for($i = 1; $i <= $page_numbers; $i++){
 
@@ -260,7 +256,7 @@ class Web {
 
                 $skuNumber = $key->find(".products_sku span", 0)->plaintext;
 
-                $sku = preg_replace("/SKU: /", "", $skuNumber);
+                $sku = preg_replace("/SKU: ETI-/", "", $skuNumber);
 
                 $my_price = $key->find(".products_price", 0)->plaintext;
 
@@ -268,14 +264,14 @@ class Web {
 
                 $href = $key->find(".data a.title", 0)->href;
 
-                $this->sqlQuery($sku, $price, $website, $sql_connection);
+                $this->price_creation_update($sku, $price, $website, $manufacturer, $sql_connection);
             }
         }
 
         mysqli_close($sql_connection);
     }
 
-    function globalindustrial($url, $website, $page_numbers, $sql_connection){
+    function globalindustrial($url, $website, $page_numbers, $manufacturer, $sql_connection){
         //necessary so that connection does not time out when webscraping
         set_time_limit(0);
 
@@ -324,7 +320,7 @@ class Web {
 
                 echo $sku . " " . $price . " " . $website;
 
-                $this->sqlQuery($sku, $price, $website, $sql_connection);
+                $this->price_creation_update($sku, $price, $website, $manufacturer, $sql_connection);
             }
         }
 
@@ -333,7 +329,7 @@ class Web {
 
     //make sure when passing a url as a variable for this website, you set limit = to an absurb number -- fix this later
     //does not need a sleep function
-    function source4industries($url, $website, $sql_connection){
+    function source4industries($url, $website, $manufacturer, $sql_connection){
         //necessary so that connection does not time out when webscraping
         set_time_limit(0);
 
@@ -367,13 +363,13 @@ class Web {
 
             echo $info . " " . $value1 . " " . $website .  " " . $url;
 
-            $this->sqlQuery($info, $value1, $website, $sql_connection);
+            $this->price_creation_update($sku, $price, $website, $manufacturer, $sql_connection);
         }
 
         mysqli_close($sql_connection);
     }
 
-    function spill911($url, $website, $sql_connection){
+    function spill911($url, $website, $manufacturer, $sql_connection){
         //necessary so that connection does not time out when webscraping
         set_time_limit(0);
 
@@ -408,7 +404,7 @@ class Web {
                 $combined = array_combine($sku_array, $price_array);
 
                 foreach ($combined as $sku => $price) {
-                    $this->sqlQuery($sku, $price, $website, $sql_connection);
+                    $this->price_creation_update($sku, $price, $website, $manufacturer, $sql_connection);
                 }
             };
 
@@ -420,7 +416,9 @@ class Web {
     //no pages_count because this can be loaded and rendered on one page
     //no sleep function either
     //perhaps later we can construct an object of each product, as to store the url in the database?
-    function custommhs($url, $website, $sql_connection){
+
+    //reconstruct this function
+    function custommhs($url, $website, $manufacturer, $sql_connection){
         //necessary so that connection does not time out when webscraping
         set_time_limit(0);
 
@@ -449,7 +447,7 @@ class Web {
                 $website = "custommhs";
                 $url = " ";
 
-                $this->sqlQuery($sku, $price, $website, $sql_connection);
+                $this->price_creation_update($sku, $price, $website, $manufacturer, $sql_connection);
             }
 
         mysqli_close($sql_connection);
@@ -458,7 +456,7 @@ class Web {
     //will need a sleep function when enabling a work around for prices with more than one item
 
     //perhaps grab santizing function and pass for other prices in this document???
-    function bizchair($url, $website, $page_numbers, $sql_connection){
+    function bizchair($url, $website, $page_numbers, $manufacturer, $sql_connection){
         set_time_limit(0);
 
         $html = new simple_html_dom();
@@ -489,7 +487,7 @@ class Web {
                 } else {
                     $price = preg_replace("/[(),$]/", "", $unsanitized_price->innertext);
 
-                    $this->sqlQuery($sku, $price, $website, $sql_connection);
+                    $this->price_creation_update($sku, $price, $website, $manufacturer, $sql_connection);
                 }
             }
             $itemOffset += 24;
@@ -498,7 +496,7 @@ class Web {
     }
 
     //URL passed should be in the form of http://www.sodyinc.com/little-giant?sort=20a&page=1
-    function sodyinc($url, $website, $page_numbers, $sql_connection){
+    function sodyinc($url, $website, $page_numbers, $manufacturer, $sql_connection){
         //ensures no timing out - php has a 30 second timeout otherwise
         set_time_limit(0);
 
@@ -551,23 +549,11 @@ class Web {
                 $combined_array = array_combine($my_sku, $my_price);
 
                 foreach ($combined_array as $sku => $price) {
-                    $this->sqlQuery($sku, $price, $website, $sql_connection);
+                    $this->price_creation_update($sku, $price, $website, $manufacturer, $sql_connection);
                 }
             }
         }
         mysqli_close($sql_connection);
-    }
-
-    //just started writing this webscraper
-    function sustainablesupply(){
-        $html = new simple_html_dom();
-        $html->load_file("http://www.sustainablesupply.com/search?keywords=little%20giant#filter:custitem_ssc_product_manufacturer:Little$2520Giant/perpage:96/page:2");
-
-        $sku_binding = $html->find("span.sku-code span.ng-binding");
-
-        foreach ($sku_binding as $key => $value) {
-            echo $value . "<br />";
-        }
     }
 
     //THIS IS VERY UGLY. I APOLOGIZE.
@@ -575,21 +561,21 @@ class Web {
     //$table_name is for which table you want to select from
     //other variables are exactly what they are declared to be
 
-    function sqlQuery($model_number, $price, $website, $sql_connection){
+    function price_creation_update($sku, $price, $website, $manufacturer, $sql_connection){
 
-         $result = mysqli_query($sql_connection, "SELECT * FROM vestil_products WHERE model_number = '$model_number' AND website = '$website'");
-
+         $result = mysqli_query($sql_connection, "SELECT * FROM webscraping WHERE sku = '$sku' AND website = '$website' AND manufacturer = '$manufacturer'");
          //if there are any results returned, update
          if(mysqli_num_rows($result) > 0){
-             mysqli_query($sql_connection, "UPDATE vestil_products SET price = $price WHERE website = '$website' AND model_number = '$model_number' " );
+             mysqli_query($sql_connection, "UPDATE webscraping SET price = $price, recently_updated = date('Y-m-d H:i:s') WHERE website = '$website' AND sku = '$sku' " );
              echo "updated <br />";
          } else {
-            mysqli_query($sql_connection, "INSERT INTO vestil_products(model_number, price, website) VALUES ('$model_number', $price, '$website') ");
+            mysqli_query($sql_connection, "INSERT INTO webscraping(sku, price, website, recently_updated, manufacturer) VALUES ('$sku', $price, '$website', date('Y-m-d H:i:s'), '$manufacturer') ");
             echo "created <br />";
          }
      }
 
-
 }
+
+
 
   ?>
