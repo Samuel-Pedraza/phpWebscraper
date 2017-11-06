@@ -2,6 +2,7 @@
 
 set_time_limit(0);
 
+$my_manufacturer = $_POST["manufacturer"];
 
 echo "<table>
 <tr>
@@ -23,7 +24,7 @@ echo "<table>
 </tr>";
 
 
-$sql = "SELECT model_number FROM vestil_products order by vestil_products.model_number";
+$sql = "SELECT sku FROM webscraping WHERE manufacturer = '$my_manufacturer' order by sku";
 
 $connect = mysqli_connect('66.112.76.254', 'root', 'adamserver5', 'sams_test_database');
 
@@ -39,22 +40,19 @@ while($row = mysqli_fetch_assoc($result)){
 
 $unique_array = array_unique($post);
 
-
 foreach ($unique_array as $key => $value) {
-    $my_sql = "SELECT * FROM vestil_products WHERE vestil_products.model_number = '$value' ORDER BY vestil_products.price ASC LIMIT 1";
+    $my_sql = "SELECT * FROM webscraping WHERE webscraping.sku = '$value' ORDER BY webscraping.price ASC LIMIT 1";
     $my_result = mysqli_query($connect, $my_sql);
-
     foreach ($my_result as $a => $b) {
         echo "<tr>";
         foreach ($b as $c => $d) {
             echo "<td>";
-            echo $d;
+                echo $d;
             echo "</td>";
         }
         echo "</tr>";
     }
 }
-
 echo "</table>";
 
 mysqli_close($connect);
