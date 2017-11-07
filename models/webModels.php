@@ -418,37 +418,42 @@ class Web {
     //perhaps later we can construct an object of each product, as to store the url in the database?
 
     //reconstruct this function
-    function custommhs($url, $website, $manufacturer, $sql_connection){
+    function custommhs($url, $website, $page_numbers, $manufacturer, $sql_connection){
         //necessary so that connection does not time out when webscraping
         set_time_limit(0);
 
-        $html = new simple_html_dom();
+        for($i = 1; $i < $page_numbers; $i++){
 
-            if($sql_connection === false){ die("ERROR: Could not connect. " . mysqli_connect_error()); }
+            $html = new simple_html_dom();
 
-            $html->load_file($url);
+                if($sql_connection === false){ die("ERROR: Could not connect. " . mysqli_connect_error()); }
 
-            $modelNumber = $html->find(".smallBoxBg ul li a");
+                $myUrl = explode("page=1", $url);
 
-            $grab_price = $html->find(".smallBoxBg ul li span");
+                $html->load_file($myUrl[0] . "page=" . $i);
 
-            $plainTextModelNumbers = array();
+                $modelNumber = $html->find(".smallBoxBg ul li a");
 
-            foreach ($modelNumber as $key => $value) {
-                $mykey = $value->plaintext;
-                array_push($plainTextModelNumbers, $mykey);
-            }
+                $grab_price = $html->find(".smallBoxBg ul li span");
 
-            $newArray = array_combine($plainTextModelNumbers, $grab_price);
+                $plainTextModelNumbers = array();
 
-            foreach ($newArray as $sku => $unsanitized_price) {
-                echo $sku;
-                $price = preg_replace("/[(),$]/", "", $unsanitized_price->plaintext);
-                $website = "custommhs";
-                $url = " ";
+                foreach ($modelNumber as $key => $value) {
+                    $mykey = $value->plaintext;
+                    array_push($plainTextModelNumbers, $mykey);
+                }
 
-                $this->price_creation_update($sku, $price, $website, $manufacturer, $sql_connection);
-            }
+                $newArray = array_combine($plainTextModelNumbers, $grab_price);
+
+                foreach ($newArray as $sku => $unsanitized_price) {
+                    echo $sku;
+                    $price = preg_replace("/[(),$]/", "", $unsanitized_price->plaintext);
+                    $website = "custommhs";
+                    $url = " ";
+
+                    $this->price_creation_update($sku, $price, $website, $manufacturer, $sql_connection);
+                }
+        }
 
         mysqli_close($sql_connection);
     }
