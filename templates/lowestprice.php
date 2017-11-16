@@ -26,7 +26,7 @@ echo "<table>
 
 $sql = "SELECT sku FROM webscraping WHERE manufacturer = '$my_manufacturer' order by sku";
 
-$connect = mysqli_connect('66.112.76.254', 'root', 'adamserver5', 'sams_test_database');
+$connect = mysqli_connect('', '', '', 'sams_test_database');
 
 $result = mysqli_query($connect, $sql);
 
