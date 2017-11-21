@@ -561,6 +561,26 @@ class Web {
         mysqli_close($sql_connection);
     }
 
+
+    function zoro(){
+      $html = new simple_html_dom();
+
+      $html->load_file("https://www.zoro.com/search?brand=LITTLE+GIANT&q=little+giant&page=0");
+
+      $card = $html->find("#layout ul#grid li");
+
+      foreach ($card as $key => $value) {
+
+        $link = $value->find(".part-item ul.product-info li.part-info span.mfr-no");
+
+        foreach ($link as $a => $a_href) {
+
+          echo $a_href->innertext . "<br>";
+
+        }
+      }
+    }
+
     //THIS IS VERY UGLY. I APOLOGIZE.
     //$sql_connection is for mysqli_connection
     //$table_name is for which table you want to select from
