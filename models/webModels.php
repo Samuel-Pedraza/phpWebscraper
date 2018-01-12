@@ -562,23 +562,30 @@ class Web {
     }
 
 
-    function zoro(){
+    function fastenal(){
       $html = new simple_html_dom();
 
-      $html->load_file("https://www.zoro.com/search?brand=LITTLE+GIANT&q=little+giant&page=0");
+      $html->load_file("https://www.fastenal.com/products/vestil-mfg-co?r=~%7Cismadeinusa:Yes%7C~%20~%7Cmanufacturer:%5E%22VESTIL%20MFG.%20CO.%22$%7C~");
 
-      $card = $html->find("#layout ul#grid li");
+      $url = $html->find(".row .mid .title a");
 
-      foreach ($card as $key => $value) {
+      foreach ($url as $key => $value) {
+        $new_page = new simple_html_dom();
 
-        $link = $value->find(".part-item ul.product-info li.part-info span.mfr-no");
+        $new_page->load_file("https://www.fastenal.com" . $value->href);
 
-        foreach ($link as $a => $a_href) {
+        echo $new_webpage . "<br>" . "https://www.fastenal.com" . $value->href;
 
-          echo $a_href->innertext . "<br>";
+        // $price = $new_page->find("div.addcart__layout div.qty__items div.padding-bottom-5 div.color-highlight");
+        //
+        // foreach ($price as $a => $b) {
+        //   echo $b . "<br>";
+        // }
 
-        }
+
       }
+
+
     }
 
     //THIS IS VERY UGLY. I APOLOGIZE.
@@ -591,7 +598,7 @@ class Web {
          $result = mysqli_query($sql_connection, "SELECT * FROM webscraping WHERE sku = '$sku' AND website = '$website' AND manufacturer = '$manufacturer'");
          //if there are any results returned, update
          if(mysqli_num_rows($result) > 0){
-             mysqli_query($sql_connection, "UPDATE webscraping SET price = $price, recently_updated = date('Y-m-d H:i:s') WHERE website = '$website' AND sku = '$sku' " );
+             mysqli_query($sql_connection, "UPDATE webscraping SET price = $price, recently_updated = NOW() WHERE website = '$website' AND sku = '$sku' " );
              echo "updated <br />";
          } else {
             mysqli_query($sql_connection, "INSERT INTO webscraping(sku, price, website, recently_updated, manufacturer) VALUES ('$sku', $price, '$website', date('Y-m-d H:i:s'), '$manufacturer') ");
